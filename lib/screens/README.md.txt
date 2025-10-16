@@ -1,0 +1,1 @@
+This folder is for screens for instance: Home, Notifications, etc

@@ -1,3 +1,4 @@
+import 'package:debtdude/screens/homescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:debtdude/cubits/auth_cubit.dart';
@@ -120,6 +121,8 @@ class _AuthScreenContentState extends State<AuthScreenContent> {
                           _passwordController.text,
                         );
                   }
+
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => HomePage())); 
                 },
                 child: Text(_isSignUp ? 'Sign Up' : 'Sign In', style: TextStyle(color: Colors.white)),
               ),

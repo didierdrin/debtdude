@@ -1,6 +1,7 @@
 import 'package:debtdude/screens/homescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:debtdude/screens/splash_screen.dart';
+import 'screens/notifications_screen.dart';
 
 void main() {
   runApp(const MyApp());

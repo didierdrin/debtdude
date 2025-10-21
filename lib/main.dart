@@ -1,3 +1,4 @@
+import 'package:debtdude/screens/homescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:debtdude/screens/splash_screen.dart';
 import 'screens/notifications_screen.dart';
@@ -17,7 +18,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF5573F6)),
       ),
-      home: const NotificationsScreen(),
+    
+      home: const HomePage(),
     );
   }
 }

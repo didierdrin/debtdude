@@ -1,6 +1,6 @@
+import 'package:debtdude/screens/homescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:debtdude/screens/splash_screen.dart';
-import 'package:debtdude/screens/home.dart'; 
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +17,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF5573F6)),
       ),
-      home: const SplashScreen(),
+    
+      home: const HomePage(),
     );
   }
 }

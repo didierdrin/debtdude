@@ -8,7 +8,7 @@ on:
   workflow_dispatch: # Allows manual triggering
 
 env:
-  FLUTTER_VERSION: '3.22.0' # Use stable Flutter version
+  FLUTTER_VERSION: '3.32.6' # Use stable Flutter version
 
 jobs:
   build:

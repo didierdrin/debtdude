@@ -9,6 +9,7 @@ class NotificationsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        automaticallyImplyLeading: false,
         title: const Text(
           "Notifications",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
@@ -22,7 +23,7 @@ class NotificationsScreen extends StatelessWidget {
           ),
         ],
       ),
-      backgroundColor: Colors.grey[200],
+      backgroundColor: Colors.white,
       body: Column(
         children: [
           // Tabs for Withdraw, Received, Tracking
@@ -57,14 +58,14 @@ class NotificationsScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
       decoration: BoxDecoration(
-        color: isActive ? Colors.deepPurple : Colors.white,
+        color: isActive ? Colors.indigoAccent : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.deepPurple),
+        border: Border.all(color: Colors.indigoAccent),
       ),
       child: Text(
         text,
         style: TextStyle(
-          color: isActive ? Colors.white : Colors.deepPurple,
+          color: isActive ? Colors.white : Colors.indigoAccent,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -85,10 +86,7 @@ class NotificationsScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              const CircleAvatar(
-                radius: 22,
-                backgroundColor: Colors.blue,
-              ),
+              const CircleAvatar(radius: 22, backgroundColor: Colors.blue),
               const SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,10 +103,7 @@ class NotificationsScreen extends StatelessWidget {
               ),
             ],
           ),
-          const Text(
-            "2:15 pm",
-            style: TextStyle(color: Colors.grey),
-          ),
+          const Text("2:15 pm", style: TextStyle(color: Colors.grey)),
         ],
       ),
     );

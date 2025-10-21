@@ -1,13 +1,14 @@
+import 'package:debtdude/screens/notifications_screen.dart';
 import 'package:flutter/material.dart';
 
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfileScreenState extends State<ProfileScreen> {
   bool _notificationsEnabled = true;
   bool _smsAnalysisEnabled = true;
   String _selectedCurrency = 'RWF';
@@ -15,23 +16,34 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'Profile',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: const Color(0xFF2E7D32),
-        elevation: 0,
-        centerTitle: true,
-      ),
+      backgroundColor: Colors.white,
+      
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 0),
         child: Column(
           children: [
+             Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Profile',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.notifications_none_outlined,
+                      color: Colors.black,
+                    ),
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => NotificationsScreen())); 
+                    },
+                  ),
+                ],
+              ),
             // Profile Header
             Container(
               padding: const EdgeInsets.all(20),
@@ -51,7 +63,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundColor: const Color(0xFF2E7D32),
+                    backgroundColor: const Color(0xFF5573F6),
                     child: const Icon(
                       Icons.person,
                       size: 50,
@@ -64,16 +76,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF2E7D32),
+                      color: Color(0xFF5573F6),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '+250 788 123 456',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
@@ -83,7 +92,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     icon: const Icon(Icons.edit, size: 18),
                     label: const Text('Edit Profile'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2E7D32),
+                      backgroundColor: const Color(0xFF5573F6),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -120,14 +129,17 @@ class _ProfilePageState extends State<ProfilePage> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF2E7D32),
+                        color: Color(0xFF5573F6),
                       ),
                     ),
                   ),
-                  
+
                   // Notifications Toggle
                   ListTile(
-                    leading: const Icon(Icons.notifications, color: Color(0xFF2E7D32)),
+                    leading: const Icon(
+                      Icons.notifications,
+                      color: Color(0xFF5573F6),
+                    ),
                     title: const Text('Notifications'),
                     subtitle: const Text('Debt reminders and alerts'),
                     trailing: Switch(
@@ -137,7 +149,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           _notificationsEnabled = value;
                         });
                       },
-                      activeColor: const Color(0xFF2E7D32),
+                      activeColor: const Color(0xFF5573F6),
                     ),
                   ),
 
@@ -145,7 +157,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   // SMS Analysis Toggle
                   ListTile(
-                    leading: const Icon(Icons.sms, color: Color(0xFF2E7D32)),
+                    leading: const Icon(Icons.sms, color: Color(0xFF5573F6)),
                     title: const Text('SMS Analysis'),
                     subtitle: const Text('Auto-categorize transactions'),
                     trailing: Switch(
@@ -155,7 +167,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           _smsAnalysisEnabled = value;
                         });
                       },
-                      activeColor: const Color(0xFF2E7D32),
+                      activeColor: const Color(0xFF5573F6),
                     ),
                   ),
 
@@ -163,7 +175,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   // Currency Selection
                   ListTile(
-                    leading: const Icon(Icons.attach_money, color: Color(0xFF2E7D32)),
+                    leading: const Icon(
+                      Icons.attach_money,
+                      color: Color(0xFF5573F6),
+                    ),
                     title: const Text('Currency'),
                     subtitle: Text('Current: $_selectedCurrency'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -194,7 +209,10 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Column(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.security, color: Color(0xFF2E7D32)),
+                    leading: const Icon(
+                      Icons.security,
+                      color: Color(0xFF5573F6),
+                    ),
                     title: const Text('Privacy & Security'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
@@ -203,7 +221,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const Divider(height: 1),
                   ListTile(
-                    leading: const Icon(Icons.help, color: Color(0xFF2E7D32)),
+                    leading: const Icon(Icons.help, color: Color(0xFF5573F6)),
                     title: const Text('Help & Support'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
@@ -212,7 +230,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const Divider(height: 1),
                   ListTile(
-                    leading: const Icon(Icons.info, color: Color(0xFF2E7D32)),
+                    leading: const Icon(Icons.info, color: Color(0xFF5573F6)),
                     title: const Text('About DebtDude'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
@@ -336,10 +354,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 Navigator.pop(context);
                 // Implement logout functionality
               },
-              child: const Text(
-                'Logout',
-                style: TextStyle(color: Colors.red),
-              ),
+              child: const Text('Logout', style: TextStyle(color: Colors.red)),
             ),
           ],
         );

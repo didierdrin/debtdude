@@ -1,4 +1,4 @@
-import 'package:debtdude/screens/homescreen.dart';
+import 'package:debtdude/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:debtdude/screens/splash_screen.dart';
 import 'screens/notifications_screen.dart';

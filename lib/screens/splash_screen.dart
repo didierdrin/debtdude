@@ -29,11 +29,12 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset('assets/images/logo.png', width: 200, height: 200,), 
-            const SizedBox(height: 5),
+            const SizedBox(height: 0),
             Text(
               'DebtDude',
               style: TextStyle(
                 fontSize: 32,
+                fontWeight: FontWeight.bold,
                 color: const Color(0xFF5573F6),
               ),
             ),

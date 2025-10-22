@@ -1,26 +1,34 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthCubit extends Cubit<AuthState> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  
   AuthCubit() : super(AuthInitial());
 
-  void signUp(String username, String password, String confirmPassword) {
-    if (password == confirmPassword) {
-      emit(AuthLoading());
-      // Simulate sign-up process
-      Future.delayed(Duration(seconds: 1), () {
-        emit(AuthSuccess('Sign up successful'));
-      });
-    } else {
+  Future<void> signUp(String email, String password, String confirmPassword) async {
+    if (password != confirmPassword) {
       emit(AuthError('Passwords do not match'));
+      return;
+    }
+    
+    emit(AuthLoading());
+    try {
+      await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      emit(AuthSuccess('Sign up successful'));
+    } catch (e) {
+      emit(AuthError(e.toString()));
     }
   }
 
-  void signIn(String username, String password) {
+  Future<void> signIn(String email, String password) async {
     emit(AuthLoading());
-    // Simulate sign-in process
-    Future.delayed(Duration(seconds: 1), () {
+    try {
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
       emit(AuthSuccess('Sign in successful'));
-    });
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
   }
 }
 

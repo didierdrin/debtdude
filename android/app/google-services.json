@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "612497029405",
+    "project_id": "debtdude",
+    "storage_bucket": "debtdude.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:612497029405:android:d65955d053772fce1989f4",
+        "android_client_info": {
+          "package_name": "com.example.debtdude"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAeJOyM5vqI0drHIM6ejo-o6NX9mP9NJWI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

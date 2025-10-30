@@ -1,21 +1,21 @@
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:telephony/telephony.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:debtdude/services/sms_service.dart';
 
 part 'save_firebase_state.dart';
 
 class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final Telephony telephony = Telephony.instance;
+  final SmsService _smsService = SmsService(); 
 
   SaveFirebaseCubit() : super(SaveFirebaseInitial());
 
   // Check SMS permission
-  Future<bool> checkSmsPermission() async {
-    final permission = await telephony.requestSmsPermissions;
-    return permission ?? false;
+   Future<bool> checkSmsPermission() async {
+    return await _smsService.checkSmsPermission();
   }
 
   // Parse SMS message and extract transaction data
@@ -277,8 +277,7 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
     }
   }
 
-  // Read all SMS messages, parse transactions and save to Firebase
-  Future<void> readAndSaveSmsToFirebase() async {
+ Future<void> readAndSaveSmsToFirebase() async {
     try {
       emit(SaveFirebaseLoading());
       
@@ -294,17 +293,18 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
         return;
       }
 
-      // Query SMS messages
-      final List<SmsMessage> messages = await telephony.getInboxSms(
-        columns: [SmsColumn.ADDRESS, SmsColumn.BODY, SmsColumn.DATE],
-        filter: SmsFilter.where(SmsColumn.BODY).notEqualTo(""),
-      );
+      // Query SMS messages using our custom service
+      final messages = await _smsService.getInboxSms();
 
       // Parse transactions from messages
       final List<Map<String, dynamic>> transactions = [];
       
       for (final message in messages) {
-        final transaction = _parseTransaction(message.body ?? '', message.address ?? '', message.date ?? 0);
+        final transaction = _parseTransaction(
+          message.body ?? '', 
+          message.address ?? '', 
+          message.date ?? 0
+        );
         if (transaction != null) {
           transactions.add(transaction);
         }
@@ -335,28 +335,30 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    telephony.listenIncomingSms(
-      onNewMessage: (SmsMessage message) async {
-        try {
-          final transaction = _parseTransaction(message.body ?? '', message.address ?? '', message.date ?? 0);
-          if (transaction != null) {
-            // Add new transaction to existing document
-            await _firestore
-                .collection('user_transactions')
-                .doc(user.uid)
-                .update({
-                  'transactions': FieldValue.arrayUnion([transaction]),
-                  'last_updated': FieldValue.serverTimestamp(),
-                  'total_transactions': FieldValue.increment(1),
-                });
-          }
-        } catch (e) {
-          print('Error saving new transaction: $e');
+    _smsService.listenForNewSms((SmsMessage message) async {
+      try {
+        final transaction = _parseTransaction(
+          message.body ?? '', 
+          message.address ?? '', 
+          message.date ?? 0
+        );
+        if (transaction != null) {
+          // Add new transaction to existing document
+          await _firestore
+              .collection('user_transactions')
+              .doc(user.uid)
+              .update({
+                'transactions': FieldValue.arrayUnion([transaction]),
+                'last_updated': FieldValue.serverTimestamp(),
+                'total_transactions': FieldValue.increment(1),
+              });
         }
-      },
-      listenInBackground: false,
-    );
+      } catch (e) {
+        print('Error saving new transaction: $e');
+      }
+    });
   }
+
 
   // Get stored transactions from Firebase
   Stream<DocumentSnapshot> getStoredTransactions() {

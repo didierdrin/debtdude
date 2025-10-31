@@ -277,43 +277,53 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
     }
   }
 
- Future<void> readAndSaveSmsToFirebase() async {
+
+Future<void> readAndSaveSmsToFirebase() async {
     try {
       emit(SaveFirebaseLoading());
       
       final user = _auth.currentUser;
       if (user == null) {
+        print('User not logged in');
         emit(SaveFirebaseError('User not logged in'));
         return;
       }
 
+      print('Checking SMS permission...');
       final hasPermission = await checkSmsPermission();
       if (!hasPermission) {
-        emit(SaveFirebaseError('SMS permission denied'));
+        print('SMS permission denied');
+        emit(SaveFirebaseError('SMS permission denied. Please grant SMS permission.'));
         return;
       }
 
-      // Query SMS messages using our custom service
+      print('Querying SMS messages...');
       final messages = await _smsService.getInboxSms();
+      print('Retrieved ${messages.length} SMS messages');
 
       // Parse transactions from messages
       final List<Map<String, dynamic>> transactions = [];
       
       for (final message in messages) {
+        print('Processing SMS: ${message.address} - ${message.body}');
         final transaction = _parseTransaction(
           message.body ?? '', 
           message.address ?? '', 
           message.date ?? 0
         );
         if (transaction != null) {
+          print('Parsed transaction: $transaction');
           transactions.add(transaction);
         }
       }
 
+      print('Total transactions parsed: ${transactions.length}');
+
       // Sort transactions by timestamp (newest first)
       transactions.sort((a, b) => (b['timestamp'] as int).compareTo(a['timestamp'] as int));
 
-      // Save to Firebase using user UID as document ID
+      // Save to Firebase
+      print('Saving to Firebase...');
       await _firestore
           .collection('user_transactions')
           .doc(user.uid)
@@ -323,42 +333,23 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
             'total_transactions': transactions.length,
           }, SetOptions(merge: true));
 
+      print('Successfully saved ${transactions.length} transactions to Firebase');
       emit(SaveFirebaseSuccess(transactions.length));
       
     } catch (e) {
+      print('Error in readAndSaveSmsToFirebase: $e');
       emit(SaveFirebaseError('Failed to read and save SMS: $e'));
     }
   }
 
-  // Read SMS in real-time (listening for new messages)
-  void listenForNewSms() {
-    final user = _auth.currentUser;
-    if (user == null) return;
 
-    _smsService.listenForNewSms((SmsMessage message) async {
-      try {
-        final transaction = _parseTransaction(
-          message.body ?? '', 
-          message.address ?? '', 
-          message.date ?? 0
-        );
-        if (transaction != null) {
-          // Add new transaction to existing document
-          await _firestore
-              .collection('user_transactions')
-              .doc(user.uid)
-              .update({
-                'transactions': FieldValue.arrayUnion([transaction]),
-                'last_updated': FieldValue.serverTimestamp(),
-                'total_transactions': FieldValue.increment(1),
-              });
-        }
-      } catch (e) {
-        print('Error saving new transaction: $e');
-      }
-    });
-  }
 
+// void listenForNewSms() {
+//   SmsReceiver receiver = SmsReceiver();
+//   receiver.onSmsReceived.listen((SmsMessage msg) {
+//     // Parse and save single new msg
+//   });
+// }
 
   // Get stored transactions from Firebase
   Stream<DocumentSnapshot> getStoredTransactions() {
@@ -372,6 +363,7 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
         .doc(user.uid)
         .snapshots();
   }
+
 
   // Get recent transactions (last 10)
   Stream<List<Map<String, dynamic>>> getRecentTransactions() {

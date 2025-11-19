@@ -35,7 +35,9 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<ConversationCubit>().loadMessages();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ConversationCubit>().loadMessages();
+    });
     _loadTransactions();
   }
 

@@ -9,14 +9,11 @@ class ConversationLoading extends ConversationState {}
 class MessageSending extends ConversationState {}
 
 class MessagesLoaded extends ConversationState {
-  final List<dynamic> messages;
+  final List<Map<String, dynamic>> messages;
   MessagesLoaded(this.messages);
 }
 
-class MessageSent extends ConversationState {
-  final Map<String, dynamic> messageData;
-  MessageSent(this.messageData);
-}
+class MessageSent extends ConversationState {}
 
 class ConversationError extends ConversationState {
   final String message;

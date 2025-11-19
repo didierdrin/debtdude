@@ -1,6 +1,8 @@
 import 'package:debtdude/screens/notifications_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:debtdude/widgets/dialog_box.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:debtdude/cubits/save_firebase_cubit.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -11,149 +13,91 @@ class StatsScreen extends StatefulWidget {
 
 class _StatsScreenState extends State<StatsScreen> {
   int _selectedTab = 0; // 0 for Income, 1 for Outcome
-  final List<Map<String, dynamic>> _incomeData = [
-    {
-      'category': 'Salary',
-      'amount': 50000,
-      'percentage': 50,
-      'color': const Color(0xFF5573F6),
-    },
-    {
-      'category': 'Freelance',
-      'amount': 25000,
-      'percentage': 25,
-      'color': const Color(0xFF4CAF50),
-    },
-    {
-      'category': 'Investments',
-      'amount': 15000,
-      'percentage': 15,
-      'color': const Color(0xFFFF9800),
-    },
-    {
-      'category': 'Other',
-      'amount': 10000,
-      'percentage': 10,
-      'color': const Color(0xFFF44336),
-    },
-  ];
 
-  final List<Map<String, dynamic>> _outcomeData = [
-    {
-      'category': 'Food',
-      'amount': 20000,
-      'percentage': 40,
-      'color': const Color(0xFF5573F6),
-    },
-    {
-      'category': 'Transport',
-      'amount': 10000,
-      'percentage': 20,
-      'color': const Color(0xFF4CAF50),
-    },
-    {
-      'category': 'Entertainment',
-      'amount': 8000,
-      'percentage': 16,
-      'color': const Color(0xFFFF9800),
-    },
-    {
-      'category': 'Bills',
-      'amount': 12000,
-      'percentage': 24,
-      'color': const Color(0xFFF44336),
-    },
-  ];
+  List<Map<String, dynamic>> _calculateCategoryData(List<Map<String, dynamic>> transactions, bool isIncome) {
+    final categoryTotals = <String, int>{};
+    final categoryColors = {
+      'Money Received': const Color(0xFF4CAF50),
+      'Money Sent': const Color(0xFFF44336),
+      'Loan Received': const Color(0xFF2196F3),
+      'Loan Repayment': const Color(0xFFFF9800),
+      'Vendor Payment': const Color(0xFF9C27B0),
+    };
 
-  final List<Map<String, dynamic>> _incomeRecords = [
-    {
-      'name': 'John - Debt Record',
-      'time': '2:15 pm',
-      'description': 'You borrowed 15,000 on 20th Sept.',
-      'amount': 15000,
-      'type': 'borrowed',
-    },
-    {
-      'name': 'Sarah - Payment',
-      'time': '1:30 pm',
-      'description': 'Sarah paid back 8,000',
-      'amount': 8000,
-      'type': 'received',
-    },
-    {
-      'name': 'Mike - Debt Record',
-      'time': '11:45 am',
-      'description': 'You borrowed 25,000 on 19th Sept.',
-      'amount': 25000,
-      'type': 'borrowed',
-    },
-    {
-      'name': 'Emma - Payment',
-      'time': '10:20 am',
-      'description': 'Emma paid back 12,000',
-      'amount': 12000,
-      'type': 'received',
-    },
-    {
-      'name': 'David - Debt Record',
-      'time': '9:15 am',
-      'description': 'You borrowed 10,000 on 18th Sept.',
-      'amount': 10000,
-      'type': 'borrowed',
-    },
-  ];
+    for (final transaction in transactions) {
+      final amount = (transaction['amount'] as num).abs().toInt();
+      final type = transaction['type'] as String;
+      final isPositive = (transaction['amount'] as num) > 0;
+      
+      if ((isIncome && isPositive) || (!isIncome && !isPositive)) {
+        categoryTotals[type] = (categoryTotals[type] ?? 0) + amount;
+      }
+    }
 
-  final List<Map<String, dynamic>> _outcomeRecords = [
-    {
-      'name': 'Grocery Store',
-      'time': '2:15 pm',
-      'description': 'Weekly grocery shopping',
-      'amount': 5000,
-      'type': 'food',
-    },
-    {
-      'name': 'Fuel Station',
-      'time': '1:30 pm',
-      'description': 'Car refueling',
-      'amount': 3000,
-      'type': 'transport',
-    },
-    {
-      'name': 'Electricity Bill',
-      'time': '11:45 am',
-      'description': 'Monthly electricity payment',
-      'amount': 2500,
-      'type': 'bills',
-    },
-    {
-      'name': 'Movie Tickets',
-      'time': '10:20 am',
-      'description': 'Weekend movie',
-      'amount': 2000,
-      'type': 'entertainment',
-    },
-    {
-      'name': 'Restaurant',
-      'time': '9:15 am',
-      'description': 'Dinner with friends',
-      'amount': 4500,
-      'type': 'food',
-    },
-  ];
+    final total = categoryTotals.values.fold(0, (sum, amount) => sum + amount);
+    if (total == 0) return [];
+
+    return categoryTotals.entries.map((entry) {
+      final percentage = ((entry.value / total) * 100).round();
+      return {
+        'category': entry.key,
+        'amount': entry.value,
+        'percentage': percentage,
+        'color': categoryColors[entry.key] ?? const Color(0xFF5573F6),
+      };
+    }).toList();
+  }
+
+  List<Map<String, dynamic>> _filterTransactions(List<Map<String, dynamic>> transactions, bool isIncome) {
+    return transactions.where((transaction) {
+      final amount = transaction['amount'] as num;
+      return isIncome ? amount > 0 : amount < 0;
+    }).map((transaction) => {
+      ...transaction,
+      'time': _formatTime(transaction['timestamp'] as int),
+      'description': '${transaction['type']} via ${transaction['service']}',
+    }).toList();
+  }
+
+  String _formatTime(int timestamp) {
+    final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    final hour = date.hour > 12 ? date.hour - 12 : date.hour;
+    final period = date.hour >= 12 ? 'pm' : 'am';
+    return '${hour == 0 ? 12 : hour}:${date.minute.toString().padLeft(2, '0')} $period';
+  }
 
   double _getTotalAmount(List<Map<String, dynamic>> data) {
-    return data.fold(
-      0,
-      (sum, item) => sum + (item['amount'] as num).toDouble(),
-    );
+    return data.fold(0, (sum, item) => sum + (item['amount'] as num).toDouble());
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentRecords = _selectedTab == 0 ? _incomeRecords : _outcomeRecords;
+    return BlocProvider(
+      create: (context) => SaveFirebaseCubit(),
+      child: BlocBuilder<SaveFirebaseCubit, SaveFirebaseState>(
+        builder: (context, state) {
+          return StreamBuilder<List<Map<String, dynamic>>>(
+            stream: context.read<SaveFirebaseCubit>().getRecentTransactions(),
+            builder: (context, snapshot) {
+              final transactions = snapshot.data ?? [];
+              final incomeData = _calculateCategoryData(transactions, true);
+              final outcomeData = _calculateCategoryData(transactions, false);
+              final incomeRecords = _filterTransactions(transactions, true);
+              final outcomeRecords = _filterTransactions(transactions, false);
+              
+              final currentRecords = _selectedTab == 0 ? incomeRecords : outcomeRecords;
+              final currentData = _selectedTab == 0 ? incomeData : outcomeData;
+              final totalAmount = _getTotalAmount(currentData);
 
-    final currentData = _selectedTab == 0 ? _incomeData : _outcomeData;
-    final totalAmount = _getTotalAmount(currentData);
+              return _buildStatsScreen(context, currentRecords, currentData, totalAmount);
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildStatsScreen(BuildContext context, List<Map<String, dynamic>> currentRecords, List<Map<String, dynamic>> currentData, double totalAmount) {
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -286,14 +230,22 @@ class _StatsScreenState extends State<StatsScreen> {
                     // Simple Pie Chart representation using stacked containers
                     Container(
                       height: 120,
-                      child: Stack(
-                        children: _buildPieChartSegments(currentData),
-                      ),
+                      child: currentData.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'No data available',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            )
+                          : Stack(
+                              children: _buildPieChartSegments(currentData),
+                            ),
                     ),
                     const SizedBox(height: 16),
                     // Legend
-                    Column(
-                      children: currentData.map((item) {
+                    if (currentData.isNotEmpty)
+                      Column(
+                        children: currentData.map((item) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4.0),
                           child: Row(
@@ -352,9 +304,16 @@ class _StatsScreenState extends State<StatsScreen> {
               ),
               const SizedBox(height: 10),
               Expanded(
-                child: ListView.builder(
-                  itemCount: currentRecords.length,
-                  itemBuilder: (context, index) {
+                child: currentRecords.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'No transactions found',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: currentRecords.length,
+                        itemBuilder: (context, index) {
                     final record = currentRecords[index];
                     return GestureDetector(
                       onTap: () {
@@ -396,9 +355,9 @@ class _StatsScreenState extends State<StatsScreen> {
                           children: [
                             CircleAvatar(
                               radius: 20,
-                              backgroundColor: _getAvatarColor(record['type']),
+                              backgroundColor: _getAvatarColor(record['category']),
                               child: Icon(
-                                _getAvatarIcon(record['type']),
+                                _getAvatarIcon(record['category']),
                                 color: Colors.white,
                                 size: 16,
                               ),
@@ -439,7 +398,7 @@ class _StatsScreenState extends State<StatsScreen> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'RWF${record['amount']}',
+                                    'RWF${(record['amount'] as num).abs()}',
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -455,9 +414,8 @@ class _StatsScreenState extends State<StatsScreen> {
                         ),
                       ),
                     );
-                  },
-                ),
-              ),
+                        },
+                      ),
             ],
           ),
         ),
@@ -514,39 +472,31 @@ class _StatsScreenState extends State<StatsScreen> {
     return segments;
   }
 
-  Color _getAvatarColor(String type) {
-    switch (type) {
-      case 'borrowed':
-        return const Color(0xFF5573F6);
+  Color _getAvatarColor(String category) {
+    switch (category) {
       case 'received':
+      case 'loan-received':
         return const Color(0xFF4CAF50);
-      case 'food':
-        return const Color(0xFFFF9800);
-      case 'transport':
-        return const Color(0xFF9C27B0);
-      case 'bills':
+      case 'sent':
+      case 'loan-paid':
         return const Color(0xFFF44336);
-      case 'entertainment':
-        return const Color(0xFF2196F3);
+      case 'vendor-paid':
+        return const Color(0xFF9C27B0);
       default:
         return const Color(0xFF5573F6);
     }
   }
 
-  IconData _getAvatarIcon(String type) {
-    switch (type) {
-      case 'borrowed':
-        return Icons.arrow_downward;
+  IconData _getAvatarIcon(String category) {
+    switch (category) {
       case 'received':
+      case 'loan-received':
+        return Icons.arrow_downward;
+      case 'sent':
+      case 'loan-paid':
         return Icons.arrow_upward;
-      case 'food':
-        return Icons.restaurant;
-      case 'transport':
-        return Icons.directions_car;
-      case 'bills':
-        return Icons.receipt;
-      case 'entertainment':
-        return Icons.movie;
+      case 'vendor-paid':
+        return Icons.store;
       default:
         return Icons.attach_money;
     }

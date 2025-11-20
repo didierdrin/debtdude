@@ -125,7 +125,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       color: Colors.black,
                     ),
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => NotificationsScreen())); 
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())); 
                     },
                   ),
                 ],
@@ -219,7 +219,7 @@ class _StatsScreenState extends State<StatsScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -228,7 +228,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 child: Column(
                   children: [
                     // Simple Pie Chart representation using stacked containers
-                    Container(
+                    SizedBox(
                       height: 120,
                       child: currentData.isEmpty
                           ? const Center(
@@ -325,15 +325,11 @@ class _StatsScreenState extends State<StatsScreen> {
                               content: record['description'],
                               onAskDebtDude: () {
                                 Navigator.pop(context);
-                                print(
-                                  'Ask DebtDude pressed for ${record['name']}',
-                                );
+                                // Ask DebtDude pressed
                               },
                               onMarkAsRead: () {
                                 Navigator.pop(context);
-                                print(
-                                  'Mark as Read pressed for ${record['name']}',
-                                );
+                                // Mark as Read pressed
                               },
                             );
                           },

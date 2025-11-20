@@ -19,10 +19,10 @@ class AuthScreenContent extends StatefulWidget {
   const AuthScreenContent({super.key});
   
   @override
-  _AuthScreenContentState createState() => _AuthScreenContentState();
+  AuthScreenContentState createState() => AuthScreenContentState();
 }
 
-class _AuthScreenContentState extends State<AuthScreenContent> {
+class AuthScreenContentState extends State<AuthScreenContent> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -138,7 +138,7 @@ class _AuthScreenContentState extends State<AuthScreenContent> {
                           BlocBuilder<AuthCubit, AuthState>(
                             builder: (context, state) {
                               return ElevatedButton(
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo, minimumSize: Size(double.infinity, 50)),
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo, minimumSize: const Size(double.infinity, 50)),
                                 onPressed: state is AuthLoading ? null : () {
                                   if (_isSignUp) {
                                     context.read<AuthCubit>().signUp(
@@ -154,8 +154,8 @@ class _AuthScreenContentState extends State<AuthScreenContent> {
                                   }
                                 },
                                 child: state is AuthLoading
-                                  ? CircularProgressIndicator(color: Colors.white)
-                                  : Text(_isSignUp ? 'Sign Up' : 'Sign In', style: TextStyle(color: Colors.white)),
+                                  ? const CircularProgressIndicator(color: Colors.white)
+                                  : Text(_isSignUp ? 'Sign Up' : 'Sign In', style: const TextStyle(color: Colors.white)),
                               );
                             },
                           ),

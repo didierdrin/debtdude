@@ -48,7 +48,7 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
 
       return transaction;
     } catch (e) {
-      print('Error parsing transaction: $e');
+      // Error parsing transaction
       return null;
     }
   }
@@ -131,7 +131,7 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
 
       return null;
     } catch (e) {
-      print('Error parsing M-Money: $e');
+      // Error parsing M-Money
       return null;
     }
   }
@@ -178,7 +178,7 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
 
       return null;
     } catch (e) {
-      print('Error parsing Mokash: $e');
+      // Error parsing Mokash
       return null;
     }
   }
@@ -259,7 +259,7 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
 
       return null;
     } catch (e) {
-      print('Error parsing AirtelMoney: $e');
+      // Error parsing AirtelMoney
       return null;
     }
   }
@@ -306,46 +306,36 @@ Future<void> readAndSaveSmsToFirebase() async {
       
       final user = _auth.currentUser;
       if (user == null) {
-        print('User not logged in');
-        emit(SaveFirebaseError('User not logged in'));
+        emit(const SaveFirebaseError('User not logged in'));
         return;
       }
 
-      print('Checking SMS permission...');
       final hasPermission = await checkSmsPermission();
       if (!hasPermission) {
-        print('SMS permission denied');
-        emit(SaveFirebaseError('SMS permission denied. Please grant SMS permission.'));
+        emit(const SaveFirebaseError('SMS permission denied. Please grant SMS permission.'));
         return;
       }
 
-      print('Querying SMS messages...');
       final messages = await _smsService.getInboxSms();
-      print('Retrieved ${messages.length} SMS messages');
 
       // Parse transactions from messages
       final List<Map<String, dynamic>> transactions = [];
       
       for (final message in messages) {
-        print('Processing SMS: ${message.address} - ${message.body}');
         final transaction = _parseTransaction(
           message.body ?? '', 
           message.address ?? '', 
           message.date ?? 0
         );
         if (transaction != null) {
-          print('Parsed transaction: $transaction');
           transactions.add(transaction);
         }
       }
-
-      print('Total transactions parsed: ${transactions.length}');
 
       // Sort transactions by timestamp (newest first)
       transactions.sort((a, b) => (b['timestamp'] as int).compareTo(a['timestamp'] as int));
 
       // Save to Firebase
-      print('Saving to Firebase...');
       await _firestore
           .collection('user_transactions')
           .doc(user.uid)
@@ -355,11 +345,9 @@ Future<void> readAndSaveSmsToFirebase() async {
             'total_transactions': transactions.length,
           }, SetOptions(merge: true));
 
-      print('Successfully saved ${transactions.length} transactions to Firebase');
       emit(SaveFirebaseSuccess(transactions.length));
       
     } catch (e) {
-      print('Error in readAndSaveSmsToFirebase: $e');
       emit(SaveFirebaseError('Failed to read and save SMS: $e'));
     }
   }

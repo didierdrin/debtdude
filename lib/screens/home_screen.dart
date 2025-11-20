@@ -17,11 +17,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeContent(),
-    const StatsScreen(),
-    const ChatScreen(),
-    const ProfileScreen(),
+  final List<Widget> _screens = const [
+    HomeContent(),
+    StatsScreen(),
+    ChatScreen(),
+    ProfileScreen(),
   ];
 
   @override
@@ -173,11 +173,11 @@ class HomeContent extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           color: Colors.black12,
                           blurRadius: 10,
-                          offset: const Offset(0, 4),
+                          offset: Offset(0, 4),
                         ),
                       ],
                     ),
@@ -298,12 +298,12 @@ class HomeContent extends StatelessWidget {
                                               onAskDebtDude: () {
                                                 Navigator.pop(context);
                                                 // Add your Ask DebtDude functionality here
-                                                print('Ask DebtDude pressed for ${tx["name"]}');
+                                                // Ask DebtDude pressed
                                               },
                                               onMarkAsRead: () {
                                                 Navigator.pop(context);
                                                 // Add your Mark as Read functionality here
-                                                print('Mark as Read pressed for ${tx["name"]}');
+                                                // Mark as Read pressed
                                               },
                                             );
                                           },

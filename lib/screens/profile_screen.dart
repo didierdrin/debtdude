@@ -43,7 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: Colors.black,
                       ),
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => NotificationsScreen()));
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
                       },
                     ),
                   ],
@@ -56,7 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey.withValues(alpha: 0.1),
                       spreadRadius: 1,
                       blurRadius: 6,
                       offset: const Offset(0, 2),
@@ -153,7 +153,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             _notificationsEnabled = value;
                           });
                         },
-                        activeColor: const Color(0xFF5573F6),
+                        activeThumbColor: const Color(0xFF5573F6),
                       ),
                     ),
            
@@ -171,7 +171,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             _smsAnalysisEnabled = value;
                           });
                         },
-                        activeColor: const Color(0xFF5573F6),
+                        activeThumbColor: const Color(0xFF5573F6),
                       ),
                     ),
            

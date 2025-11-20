@@ -1,12 +1,12 @@
 import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../services/api_service.dart';
+
 
 part 'chat_state.dart';
 
 class ChatCubit extends Cubit<ChatState> {
-  final ApiService _apiService = ApiService();
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 

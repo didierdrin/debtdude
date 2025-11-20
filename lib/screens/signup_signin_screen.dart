@@ -4,16 +4,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:debtdude/cubits/auth_cubit.dart';
 
 class AuthScreen extends StatelessWidget {
+  const AuthScreen({super.key});
+  
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => AuthCubit(),
-      child: AuthScreenContent(),
+      child: const AuthScreenContent(),
     );
   }
 }
 
 class AuthScreenContent extends StatefulWidget {
+  const AuthScreenContent({super.key});
+  
   @override
   _AuthScreenContentState createState() => _AuthScreenContentState();
 }
@@ -30,7 +34,7 @@ class _AuthScreenContentState extends State<AuthScreenContent> {
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthSuccess) {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeScreen()));
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
         } else if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
         }
@@ -52,9 +56,9 @@ class _AuthScreenContentState extends State<AuthScreenContent> {
                     Column(
                       children: [
                         Image.asset("assets/images/logo.png", height: 150, width: 150),
-                        Text(
+                        const Text(
                           'DebtDude',
-                          style: TextStyle(fontSize: 32, color: const Color(0xFF5573F6)),
+                          style: TextStyle(fontSize: 32, color: Color(0xFF5573F6)),
                         ),
                         // SizedBox(height: 20),
                       ],
@@ -68,9 +72,9 @@ class _AuthScreenContentState extends State<AuthScreenContent> {
                           if (_isSignUp) ...[
                             TextField(
                               controller: _usernameController,
-                              decoration: InputDecoration(labelText: 'Email'),
+                              decoration: const InputDecoration(labelText: 'Email'),
                             ),
-                            SizedBox(height: 16),
+                            const SizedBox(height: 16),
                             TextField(
                               controller: _passwordController,
                               obscureText: _obscurePassword,
@@ -88,7 +92,7 @@ class _AuthScreenContentState extends State<AuthScreenContent> {
                                 ),
                               ),
                             ),
-                            SizedBox(height: 16),
+                            const SizedBox(height: 16),
                             TextField(
                               controller: _confirmPasswordController,
                               obscureText: _obscurePassword,
@@ -109,9 +113,9 @@ class _AuthScreenContentState extends State<AuthScreenContent> {
                           ] else ...[
                             TextField(
                               controller: _usernameController,
-                              decoration: InputDecoration(labelText: 'Email'),
+                              decoration: const InputDecoration(labelText: 'Email'),
                             ),
-                            SizedBox(height: 16),
+                            const SizedBox(height: 16),
                             TextField(
                               controller: _passwordController,
                               obscureText: _obscurePassword,
@@ -130,7 +134,7 @@ class _AuthScreenContentState extends State<AuthScreenContent> {
                               ),
                             ),
                           ],
-                          SizedBox(height: 20),
+                          const SizedBox(height: 20),
                           BlocBuilder<AuthCubit, AuthState>(
                             builder: (context, state) {
                               return ElevatedButton(
@@ -155,7 +159,7 @@ class _AuthScreenContentState extends State<AuthScreenContent> {
                               );
                             },
                           ),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           TextButton(
                             onPressed: () {
                               setState(() {

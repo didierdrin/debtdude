@@ -15,7 +15,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     Timer(const Duration(seconds: 4), () {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => AuthScreen()),
+        MaterialPageRoute(builder: (context) => const AuthScreen()),
       );
     });
   }
@@ -30,12 +30,12 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             Image.asset('assets/images/logo.png', width: 200, height: 200,), 
             const SizedBox(height: 0),
-            Text(
+            const Text(
               'DebtDude',
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF5573F6),
+                color: Color(0xFF5573F6),
               ),
             ),
           ],

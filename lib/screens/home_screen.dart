@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:debtdude/cubits/save_firebase_cubit.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'stats_screen.dart';
 import 'chat_screen.dart';
 import 'profile_screen.dart';
@@ -129,17 +130,23 @@ class HomeContent extends StatelessWidget {
                                 child: CircleAvatar(
                                   radius: 22,
                                   backgroundColor: Colors.white,
-                                  child: Icon(
-                                    Icons.person,
-                                    color: Color(0xFF5573F6),
+                                  child: Text(
+                                    FirebaseAuth.instance.currentUser?.email?.isNotEmpty == true
+                                        ? FirebaseAuth.instance.currentUser!.email![0].toUpperCase()
+                                        : 'U',
+                                    style: const TextStyle(
+                                      color: Color(0xFF5573F6),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ),
-                              Column(
+                              const Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: const [
+                                children: [
                                   Text(
-                                    "Hello Hilal 👋",
+                                    "Hello 👋",
                                     style: TextStyle(color: Colors.white70, fontSize: 14),
                                   ),
                                   SizedBox(height: 4),

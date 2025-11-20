@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'stats_screen.dart';
 import 'chat_screen.dart';
 import 'profile_screen.dart';
-import 'conversation_screen.dart';
 import 'package:debtdude/widgets/dialog_box.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -37,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.grey.withValues(alpha: 0.2),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),

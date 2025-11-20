@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:debtdude/cubits/save_firebase_cubit.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'stats_screen.dart';
 import 'chat_screen.dart';
 import 'profile_screen.dart';
@@ -129,17 +130,23 @@ class HomeContent extends StatelessWidget {
                                 child: CircleAvatar(
                                   radius: 22,
                                   backgroundColor: Colors.white,
-                                  child: Icon(
-                                    Icons.person,
-                                    color: Color(0xFF5573F6),
+                                  child: Text(
+                                    FirebaseAuth.instance.currentUser?.email?.isNotEmpty == true
+                                        ? FirebaseAuth.instance.currentUser!.email![0].toUpperCase()
+                                        : 'U',
+                                    style: const TextStyle(
+                                      color: Color(0xFF5573F6),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ),
-                              Column(
+                              const Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: const [
+                                children: [
                                   Text(
-                                    "Hello Hilal 👋",
+                                    "Hello 👋",
                                     style: TextStyle(color: Colors.white70, fontSize: 14),
                                   ),
                                   SizedBox(height: 4),
@@ -185,19 +192,34 @@ class HomeContent extends StatelessWidget {
                             children: [
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: const [
-                                  Text(
+                                children: [
+                                  const Text(
                                     "Your Balance",
                                     style: TextStyle(color: Colors.grey, fontSize: 14),
                                   ),
-                                  SizedBox(height: 6),
-                                  Text(
-                                    "RWF 41,379.00",
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                  const SizedBox(height: 6),
+                                  StreamBuilder<int?>(
+                                    stream: context.read<SaveFirebaseCubit>().getMostRecentBalance(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData && snapshot.data != null) {
+                                        return Text(
+                                          "RWF ${snapshot.data!.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}\n",
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        );
+                                      }
+                                      return const Text(
+                                        "RWF ---.--",
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ],
                               ),

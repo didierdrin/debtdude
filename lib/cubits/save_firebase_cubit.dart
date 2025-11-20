@@ -55,6 +55,14 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
 
   Map<String, dynamic>? _parseMMoney(String body, int date) {
     try {
+      // Extract balance from M-Money SMS (Balance: amount RWF)
+      final balanceRegex = RegExp(r'Balance: (\d+(?:,\d+)*) RWF');
+      final balanceMatch = balanceRegex.firstMatch(body);
+      int? balance;
+      if (balanceMatch != null) {
+        balance = _parseAmount(balanceMatch.group(1)!);
+      }
+
       // Money received pattern
       final receivedRegex = RegExp(r'received (\d+(?:,\d+)*) RWF from (.+?) \(.*\) at (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})');
       final receivedMatch = receivedRegex.firstMatch(body);
@@ -72,6 +80,7 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
           'timestamp': date,
           'service': 'M-Money',
           'category': 'received',
+          'balance': balance,
           'original_body': body,
         };
       }
@@ -93,6 +102,7 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
           'timestamp': date,
           'service': 'M-Money',
           'category': 'sent',
+          'balance': balance,
           'original_body': body,
         };
       }
@@ -114,6 +124,7 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
           'timestamp': date,
           'service': 'M-Money',
           'category': 'vendor-paid',
+          'balance': balance,
           'original_body': body,
         };
       }
@@ -174,6 +185,14 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
 
   Map<String, dynamic>? _parseAirtelMoney(String body, int date) {
     try {
+      // Extract balance from AirtelMoney SMS (BAL RWF Amount)
+      final balanceRegex = RegExp(r'BAL RWF (\d+(?:,\d+)*)');
+      final balanceMatch = balanceRegex.firstMatch(body);
+      int? balance;
+      if (balanceMatch != null) {
+        balance = _parseAmount(balanceMatch.group(1)!);
+      }
+
       // Money received pattern
       final receivedRegex = RegExp(r'received RWF (\d+(?:,\d+)*) from (.+?) in');
       final receivedMatch = receivedRegex.firstMatch(body);
@@ -190,6 +209,7 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
           'timestamp': date,
           'service': 'AirtelMoney',
           'category': 'received',
+          'balance': balance,
           'original_body': body,
         };
       }
@@ -210,6 +230,7 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
           'timestamp': date,
           'service': 'AirtelMoney',
           'category': 'sent',
+          'balance': balance,
           'original_body': body,
         };
       }
@@ -231,6 +252,7 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
           'timestamp': date,
           'service': 'AirtelMoney',
           'category': 'vendor-paid',
+          'balance': balance,
           'original_body': body,
         };
       }
@@ -386,6 +408,32 @@ Future<void> readAndSaveSmsToFirebase() async {
               .cast<Map<String, dynamic>>()
               .take(10)
               .toList();
+        });
+  }
+
+  // Get most recent balance from SMS transactions
+  Stream<int?> getMostRecentBalance() {
+    final user = _auth.currentUser;
+    if (user == null) {
+      return const Stream.empty();
+    }
+    
+    return _firestore
+        .collection('user_transactions')
+        .doc(user.uid)
+        .snapshots()
+        .map((snapshot) {
+          if (!snapshot.exists) return null;
+          final data = snapshot.data() as Map<String, dynamic>;
+          final transactions = data['transactions'] as List<dynamic>? ?? [];
+          
+          // Find the most recent transaction with a balance
+          for (final tx in transactions.cast<Map<String, dynamic>>()) {
+            if (tx['balance'] != null) {
+              return tx['balance'] as int;
+            }
+          }
+          return null;
         });
   }
 

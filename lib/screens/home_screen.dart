@@ -34,13 +34,13 @@ class _HomeScreenState extends State<HomeScreen> {
             topLeft: Radius.circular(8),
             topRight: Radius.circular(8),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.2),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
+          // boxShadow: [
+          //   BoxShadow(
+          //     color: Colors.grey.withValues(alpha: 0.2),
+          //     blurRadius: 10,
+          //     offset: const Offset(0, -2),
+          //   ),
+          // ],
         ),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,

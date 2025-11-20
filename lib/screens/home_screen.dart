@@ -192,19 +192,34 @@ class HomeContent extends StatelessWidget {
                             children: [
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: const [
-                                  Text(
+                                children: [
+                                  const Text(
                                     "Your Balance",
                                     style: TextStyle(color: Colors.grey, fontSize: 14),
                                   ),
-                                  SizedBox(height: 6),
-                                  Text(
-                                    "RWF 41,379.00",
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                  const SizedBox(height: 6),
+                                  StreamBuilder<int?>(
+                                    stream: context.read<SaveFirebaseCubit>().getMostRecentBalance(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData && snapshot.data != null) {
+                                        return Text(
+                                          "RWF ${snapshot.data!.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}\n",
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 28,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        );
+                                      }
+                                      return const Text(
+                                        "RWF ---.--",
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 28,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ],
                               ),

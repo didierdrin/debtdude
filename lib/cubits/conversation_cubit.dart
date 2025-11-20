@@ -1,4 +1,4 @@
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -81,19 +81,19 @@ class ConversationCubit extends Cubit<ConversationState> {
     final lowerMessage = message.toLowerCase();
     
     if (lowerMessage.contains('balance') || lowerMessage.contains('total')) {
-      final balance = transactions.fold<int>(0, (sum, t) => sum + (t['amount'] as num).toInt());
+      final balance = transactions.fold<int>(0, (total, t) => total + (t['amount'] as num).toInt());
       return 'Your current balance is RWF $balance based on your recent transactions.';
     }
     
     if (lowerMessage.contains('spending') || lowerMessage.contains('expenses')) {
       final expenses = transactions.where((t) => (t['amount'] as num) < 0)
-          .fold<int>(0, (sum, t) => sum + (t['amount'] as num).abs().toInt());
+          .fold<int>(0, (total, t) => total + (t['amount'] as num).abs().toInt());
       return 'Your total expenses are RWF $expenses. This includes money sent, loan payments, and vendor payments.';
     }
     
     if (lowerMessage.contains('income') || lowerMessage.contains('received')) {
       final income = transactions.where((t) => (t['amount'] as num) > 0)
-          .fold<int>(0, (sum, t) => sum + (t['amount'] as num).toInt());
+          .fold<int>(0, (total, t) => total + (t['amount'] as num).toInt());
       return 'Your total income is RWF $income from money received and loans.';
     }
     
@@ -110,7 +110,7 @@ class ConversationCubit extends Cubit<ConversationState> {
       if (loans.isEmpty) {
         return 'You have no loan transactions in your recent history.';
       }
-      final loanBalance = loans.fold<int>(0, (sum, t) => sum + (t['amount'] as num).toInt());
+      final loanBalance = loans.fold<int>(0, (total, t) => total + (t['amount'] as num).toInt());
       return 'Your loan balance is RWF $loanBalance. You have ${loans.length} loan-related transactions.';
     }
     

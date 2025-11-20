@@ -4,7 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 class AuthCubit extends Cubit<AuthState> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   
-  AuthCubit() : super(AuthInitial());
+  AuthCubit() : super(AuthInitial()) {
+    _auth.setSettings(appVerificationDisabledForTesting: true);
+  }
 
   Future<void> signUp(String email, String password, String confirmPassword) async {
     if (password != confirmPassword) {

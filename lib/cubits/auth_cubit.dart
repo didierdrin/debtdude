@@ -14,20 +14,38 @@ class AuthCubit extends Cubit<AuthState> {
     
     emit(AuthLoading());
     try {
-      await _auth.createUserWithEmailAndPassword(email: email, password: password);
-      emit(AuthSuccess('Sign up successful'));
+      final UserCredential result = await _auth.createUserWithEmailAndPassword(
+        email: email.trim(), 
+        password: password
+      );
+      if (result.user != null) {
+        emit(AuthSuccess('Sign up successful'));
+      } else {
+        emit(AuthError('Sign up failed'));
+      }
+    } on FirebaseAuthException catch (e) {
+      emit(AuthError(e.message ?? 'Sign up failed'));
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError('An unexpected error occurred'));
     }
   }
 
   Future<void> signIn(String email, String password) async {
     emit(AuthLoading());
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
-      emit(AuthSuccess('Sign in successful'));
+      final UserCredential result = await _auth.signInWithEmailAndPassword(
+        email: email.trim(), 
+        password: password
+      );
+      if (result.user != null) {
+        emit(AuthSuccess('Sign in successful'));
+      } else {
+        emit(AuthError('Sign in failed'));
+      }
+    } on FirebaseAuthException catch (e) {
+      emit(AuthError(e.message ?? 'Sign in failed'));
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError('An unexpected error occurred'));
     }
   }
 }

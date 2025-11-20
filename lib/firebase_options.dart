@@ -25,15 +25,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -47,29 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBZqCNcucDsfb2VgDuY9Y65Gp2BgwqxREg',
-    appId: '1:460205960176:web:4a406e734a5a60ca320b35',
-    messagingSenderId: '460205960176',
-    projectId: 'debtdude-3b56e',
-    authDomain: 'debtdude-3b56e.firebaseapp.com',
-    storageBucket: 'debtdude-3b56e.firebasestorage.app',
-    measurementId: 'G-8XTXM93D5K',
+    apiKey: 'AIzaSyAPXCHYw5Pcgeunxl5mMxOb4O6K5SgqGhI',
+    appId: '1:804517591810:web:f044022911f3bc72f3e01b',
+    messagingSenderId: '804517591810',
+    projectId: 'debtdude-1b2e9',
+    authDomain: 'debtdude-1b2e9.firebaseapp.com',
+    storageBucket: 'debtdude-1b2e9.firebasestorage.app',
+    measurementId: 'G-82GYXYSG7E',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDPlklmxogMIUrB8bFUAx4FE5Q-fbYRbOo',
-    appId: '1:460205960176:android:55c1bf9ab73390b8320b35',
-    messagingSenderId: '460205960176',
-    projectId: 'debtdude-3b56e',
-    storageBucket: 'debtdude-3b56e.firebasestorage.app',
+    apiKey: 'AIzaSyBzUWoNbs2hi_NYsZtF5MZS3rAMKrCKuzY',
+    appId: '1:804517591810:android:ab196b1d168fa9b9f3e01b',
+    messagingSenderId: '804517591810',
+    projectId: 'debtdude-1b2e9',
+    storageBucket: 'debtdude-1b2e9.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCjZwP9_dJ_1JRwyrHnsNMXSouSyJcS0pc',
-    appId: '1:460205960176:ios:9b48bb7f16d49fec320b35',
-    messagingSenderId: '460205960176',
-    projectId: 'debtdude-3b56e',
-    storageBucket: 'debtdude-3b56e.firebasestorage.app',
+    apiKey: 'AIzaSyDBWZPO7q58aNzuGXI6C0qrFCpWL0ZbCwo',
+    appId: '1:804517591810:ios:7563ba1565b48265f3e01b',
+    messagingSenderId: '804517591810',
+    projectId: 'debtdude-1b2e9',
+    storageBucket: 'debtdude-1b2e9.firebasestorage.app',
     iosBundleId: 'com.example.debtdude',
   );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyDBWZPO7q58aNzuGXI6C0qrFCpWL0ZbCwo',
+    appId: '1:804517591810:ios:7563ba1565b48265f3e01b',
+    messagingSenderId: '804517591810',
+    projectId: 'debtdude-1b2e9',
+    storageBucket: 'debtdude-1b2e9.firebasestorage.app',
+    iosBundleId: 'com.example.debtdude',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyAPXCHYw5Pcgeunxl5mMxOb4O6K5SgqGhI',
+    appId: '1:804517591810:web:46dccc7a359c03fff3e01b',
+    messagingSenderId: '804517591810',
+    projectId: 'debtdude-1b2e9',
+    authDomain: 'debtdude-1b2e9.firebaseapp.com',
+    storageBucket: 'debtdude-1b2e9.firebasestorage.app',
+    measurementId: 'G-ZBNF01JVTH',
+  );
+
 }

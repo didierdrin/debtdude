@@ -1,7 +1,7 @@
 import 'package:debtdude/screens/notifications_screen.dart';
 import 'package:flutter/material.dart';
 import 'conversation_screen.dart';
-import 'package:debtdude/widgets/dialog_box.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubits/chat_cubit.dart';
 import '../cubits/save_firebase_cubit.dart';
@@ -78,7 +78,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         IconButton(
                           icon: const Icon(Icons.notifications_none_outlined, color: Colors.black),
                           onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => NotificationsScreen())); 
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())); 
                           },
                         ),
                       ],

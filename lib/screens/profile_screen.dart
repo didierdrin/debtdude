@@ -293,15 +293,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               ListTile(
                 title: const Text('Rwandan Franc (RWF)'),
-                leading: Radio<String>(
-                  value: 'RWF',
-                  groupValue: _selectedCurrency,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedCurrency = value!;
-                    });
-                    Navigator.pop(context);
-                  },
+                leading: Icon(
+                  _selectedCurrency == 'RWF' ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                  color: const Color(0xFF5573F6),
                 ),
                 onTap: () {
                   setState(() {
@@ -312,15 +306,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               ListTile(
                 title: const Text('US Dollar (USD)'),
-                leading: Radio<String>(
-                  value: 'USD',
-                  groupValue: _selectedCurrency,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedCurrency = value!;
-                    });
-                    Navigator.pop(context);
-                  },
+                leading: Icon(
+                  _selectedCurrency == 'USD' ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                  color: const Color(0xFF5573F6),
                 ),
                 onTap: () {
                   setState(() {

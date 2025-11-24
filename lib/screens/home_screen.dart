@@ -89,7 +89,17 @@ class HomeContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => SaveFirebaseCubit()..readAndSaveSmsToFirebase(),
-      child: Container(
+      child: const _HomeContentBody(),
+    );
+  }
+}
+
+class _HomeContentBody extends StatelessWidget {
+  const _HomeContentBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -386,8 +396,7 @@ class HomeContent extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }
 

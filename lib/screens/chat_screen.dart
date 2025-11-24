@@ -14,40 +14,34 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  late ChatCubit _chatCubit;
   late SaveFirebaseCubit _saveFirebaseCubit;
 
   @override
   void initState() {
     super.initState();
-    _chatCubit = ChatCubit();
     _saveFirebaseCubit = SaveFirebaseCubit();
-    _chatCubit.loadConversations();
+    context.read<ChatCubit>().loadConversations();
     _loadDashboardData();
   }
 
   void _loadDashboardData() {
     _saveFirebaseCubit.getRecentTransactions().listen((transactions) {
       if (transactions.isNotEmpty) {
-        _chatCubit.getDashboardData(transactions);
+        context.read<ChatCubit>().getDashboardData(transactions);
       }
     });
   }
 
   @override
   void dispose() {
-    _chatCubit.close();
     _saveFirebaseCubit.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider.value(value: _chatCubit),
-        BlocProvider.value(value: _saveFirebaseCubit),
-      ],
+    return BlocProvider.value(
+      value: _saveFirebaseCubit,
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(

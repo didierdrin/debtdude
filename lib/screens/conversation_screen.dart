@@ -35,9 +35,6 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ConversationCubit>().loadMessages();
-    });
     _loadTransactions();
   }
 
@@ -60,7 +57,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => ConversationCubit(widget.conversationId)),
+        BlocProvider(create: (_) => ConversationCubit(widget.conversationId)..loadMessages()),
         BlocProvider(create: (_) => SaveFirebaseCubit()),
       ],
       child: Scaffold(

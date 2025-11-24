@@ -43,7 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: Colors.black,
                       ),
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => NotificationsScreen()));
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
                       },
                     ),
                   ],
@@ -56,7 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey.withValues(alpha: 0.1),
                       spreadRadius: 1,
                       blurRadius: 6,
                       offset: const Offset(0, 2),
@@ -65,10 +65,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: Column(
                   children: [
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 50,
-                      backgroundColor: const Color(0xFF5573F6),
-                      child: const Icon(
+                      backgroundColor: Color(0xFF5573F6),
+                      child: Icon(
                         Icons.person,
                         size: 50,
                         color: Colors.white,
@@ -116,7 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey.withValues(alpha: 0.1),
                       spreadRadius: 1,
                       blurRadius: 6,
                       offset: const Offset(0, 2),
@@ -233,7 +233,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey.withValues(alpha: 0.1),
                       spreadRadius: 1,
                       blurRadius: 6,
                       offset: const Offset(0, 2),
@@ -285,7 +285,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
+                      color: Colors.grey.withValues(alpha: 0.1),
                       spreadRadius: 1,
                       blurRadius: 6,
                       offset: const Offset(0, 2),
@@ -321,24 +321,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              RadioListTile<String>(
+              ListTile(
                 title: const Text('Rwandan Franc (RWF)'),
-                value: 'RWF',
-                groupValue: _selectedCurrency,
-                onChanged: (value) {
+                leading: Icon(
+                  _selectedCurrency == 'RWF' ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                  color: const Color(0xFF5573F6),
+                ),
+                onTap: () {
                   setState(() {
-                    _selectedCurrency = value!;
+                    _selectedCurrency = 'RWF';
                   });
                   Navigator.pop(context);
                 },
               ),
-              RadioListTile<String>(
+              ListTile(
                 title: const Text('US Dollar (USD)'),
-                value: 'USD',
-                groupValue: _selectedCurrency,
-                onChanged: (value) {
+                leading: Icon(
+                  _selectedCurrency == 'USD' ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                  color: const Color(0xFF5573F6),
+                ),
+                onTap: () {
                   setState(() {
-                    _selectedCurrency = value!;
+                    _selectedCurrency = 'USD';
                   });
                   Navigator.pop(context);
                 },
@@ -386,14 +390,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             TextButton(
               onPressed: () async {
+                if (!context.mounted) return;
                 Navigator.pop(context);
                 try {
                   await FirebaseAuth.instance.signOut();
+                  if (!context.mounted) return;
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (_) => AuthScreen()),
+                    MaterialPageRoute(builder: (_) => const AuthScreen()),
                   );
                 } catch (e) {
+                  if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Logout failed: $e')),
                   );

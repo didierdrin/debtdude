@@ -1,4 +1,5 @@
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/api_service.dart';
 
@@ -48,5 +49,44 @@ class ConversationCubit extends Cubit<ConversationState> {
     }
   }
 
+  String _generateFinancialResponse(String message, List<Map<String, dynamic>> transactions) {
+    final lowerMessage = message.toLowerCase();
+    
+    if (lowerMessage.contains('balance') || lowerMessage.contains('total')) {
+      final balance = transactions.fold<int>(0, (total, t) => total + (t['amount'] as num).toInt());
+      return 'Your current balance is RWF $balance based on your recent transactions.';
+    }
+    
+    if (lowerMessage.contains('spending') || lowerMessage.contains('expenses')) {
+      final expenses = transactions.where((t) => (t['amount'] as num) < 0)
+          .fold<int>(0, (total, t) => total + (t['amount'] as num).abs().toInt());
+      return 'Your total expenses are RWF $expenses. This includes money sent, loan payments, and vendor payments.';
+    }
+    
+    if (lowerMessage.contains('income') || lowerMessage.contains('received')) {
+      final income = transactions.where((t) => (t['amount'] as num) > 0)
+          .fold<int>(0, (total, t) => total + (t['amount'] as num).toInt());
+      return 'Your total income is RWF $income from money received and loans.';
+    }
+    
+    if (lowerMessage.contains('recent') || lowerMessage.contains('latest')) {
+      if (transactions.isEmpty) {
+        return 'You have no recent transactions.';
+      }
+      final latest = transactions.first;
+      return 'Your latest transaction: ${latest['type']} of RWF ${(latest['amount'] as num).abs()} via ${latest['service']}.';
+    }
+    
+    if (lowerMessage.contains('loan')) {
+      final loans = transactions.where((t) => (t['type'] as String).contains('Loan')).toList();
+      if (loans.isEmpty) {
+        return 'You have no loan transactions in your recent history.';
+      }
+      final loanBalance = loans.fold<int>(0, (total, t) => total + (t['amount'] as num).toInt());
+      return 'Your loan balance is RWF $loanBalance. You have ${loans.length} loan-related transactions.';
+    }
+    
+    return 'I can help you with your financial information. Ask me about your balance, spending, income, recent transactions, or loans!';
+  }
 
 }

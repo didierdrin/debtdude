@@ -75,34 +75,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      'John Doe',
-                      style: TextStyle(
+                    Text(
+                      FirebaseAuth.instance.currentUser?.email ?? 'No Email',
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF5573F6),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '+250 788 123 456',
-                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        // Edit profile functionality
-                      },
-                      icon: const Icon(Icons.edit, size: 18),
-                      label: const Text('Edit Profile'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF5573F6),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
+                    // const SizedBox(height: 4),
+                    // Text(
+                    //   '+250 788 123 456',
+                    //   style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                    // ),
+                    // const SizedBox(height: 16),
+                    // ElevatedButton.icon(
+                    //   onPressed: () {
+                    //     // Edit profile functionality
+                    //   },
+                    //   icon: const Icon(Icons.edit, size: 18),
+                    //   label: const Text('Edit Profile'),
+                    //   style: ElevatedButton.styleFrom(
+                    //     backgroundColor: const Color(0xFF5573F6),
+                    //     foregroundColor: Colors.white,
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(8),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
@@ -153,7 +153,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             _notificationsEnabled = value;
                           });
                         },
-                        activeColor: const Color(0xFF5573F6),
+                        thumbColor: WidgetStateProperty.resolveWith<Color?>(
+                          (Set<WidgetState> states) {
+                            if (states.contains(WidgetState.selected)) {
+                              return const Color(0xFF5573F6);
+                            }
+                            return null;
+                          },
+                        ),
+                        trackColor: WidgetStateProperty.resolveWith<Color?>(
+                          (Set<WidgetState> states) {
+                            if (states.contains(WidgetState.selected)) {
+                              return const Color(0xFF5573F6).withOpacity(0.5);
+                            }
+                            return null;
+                          },
+                        ),
                       ),
                     ),
            
@@ -171,7 +186,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             _smsAnalysisEnabled = value;
                           });
                         },
-                        activeColor: const Color(0xFF5573F6),
+                        thumbColor: WidgetStateProperty.resolveWith<Color?>(
+                          (Set<WidgetState> states) {
+                            if (states.contains(WidgetState.selected)) {
+                              return const Color(0xFF5573F6);
+                            }
+                            return null;
+                          },
+                        ),
+                        trackColor: WidgetStateProperty.resolveWith<Color?>(
+                          (Set<WidgetState> states) {
+                            if (states.contains(WidgetState.selected)) {
+                              return const Color(0xFF5573F6).withOpacity(0.5);
+                            }
+                            return null;
+                          },
+                        ),
                       ),
                     ),
            

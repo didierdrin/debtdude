@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../cubits/save_firebase_cubit.dart';
 
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
+
+  @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  int selectedTab = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -17,34 +26,51 @@ class NotificationsScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.close, color: Colors.black),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            onPressed: () => Navigator.pop(context),
           ),
         ],
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[50],
       body: Column(
         children: [
-          // Tabs for Withdraw, Received, Tracking
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _topButton("WITHDRAW", true),
-                _topButton("RECEIVED", false),
-                _topButton("TRACKING", false),
+                _topButton("WITHDRAW", 0),
+                _topButton("RECEIVED", 1),
+                _topButton("TRACKING", 2),
               ],
             ),
           ),
-
-          // List of notifications
           Expanded(
-            child: ListView.builder(
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return _notificationTile();
+            child: StreamBuilder<List<Map<String, dynamic>>>(
+              stream: context.read<SaveFirebaseCubit>().getRecentTransactions(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                
+                final transactions = snapshot.data ?? [];
+                final filteredTransactions = _getFilteredTransactions(transactions);
+                
+                if (filteredTransactions.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No ${_getTabName()} notifications',
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  );
+                }
+                
+                return ListView.builder(
+                  itemCount: filteredTransactions.length,
+                  itemBuilder: (context, index) {
+                    final transaction = filteredTransactions[index];
+                    return _notificationTile(transaction);
+                  },
+                );
               },
             ),
           ),
@@ -53,57 +79,104 @@ class NotificationsScreen extends StatelessWidget {
     );
   }
 
-  // Top tab button style
-  Widget _topButton(String text, bool isActive) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-      decoration: BoxDecoration(
-        color: isActive ? Colors.indigoAccent : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.indigoAccent),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: isActive ? Colors.white : Colors.indigoAccent,
-          fontWeight: FontWeight.bold,
+  Widget _topButton(String text, int tabIndex) {
+    final isActive = selectedTab == tabIndex;
+    return GestureDetector(
+      onTap: () => setState(() => selectedTab = tabIndex),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? Colors.indigoAccent : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.indigoAccent),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: isActive ? Colors.white : Colors.indigoAccent,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
   }
 
-  // Notification card
-  Widget _notificationTile() {
+  List<Map<String, dynamic>> _getFilteredTransactions(List<Map<String, dynamic>> transactions) {
+    switch (selectedTab) {
+      case 0: // WITHDRAW (Money Sent)
+        return transactions.where((tx) => 
+          tx['category'] == 'sent' || 
+          tx['category'] == 'vendor-paid' ||
+          tx['category'] == 'loan-received'
+        ).toList();
+      case 1: // RECEIVED (Money Received)
+        return transactions.where((tx) => 
+          tx['category'] == 'received' ||
+          tx['category'] == 'loan-paid'
+        ).toList();
+      case 2: // TRACKING (All transactions)
+        return transactions;
+      default:
+        return [];
+    }
+  }
+
+  String _getTabName() {
+    switch (selectedTab) {
+      case 0: return 'withdraw';
+      case 1: return 'received';
+      case 2: return 'tracking';
+      default: return '';
+    }
+  }
+
+  Widget _notificationTile(Map<String, dynamic> transaction) {
+    final amount = transaction['amount'] as int? ?? 0;
+    final isPositive = amount > 0;
+    final color = isPositive ? Colors.green : Colors.red;
+    final icon = isPositive ? Icons.arrow_downward : Icons.arrow_upward;
+    final name = transaction['name'] ?? 'Unknown';
+    final type = transaction['type'] ?? 'Transaction';
+    final service = transaction['service'] ?? '';
+    final date = transaction['date'] ?? 'Unknown';
+    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              const CircleAvatar(radius: 22, backgroundColor: Colors.blue),
-              const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    "John - Debt Record",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    "You borrowed 15,000 on",
-                    style: TextStyle(color: Colors.grey, fontSize: 13),
-                  ),
-                ],
-              ),
-            ],
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: color.withOpacity(0.1),
+            child: Icon(icon, color: color, size: 20),
           ),
-          const Text("2:15 pm", style: TextStyle(color: Colors.grey)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$name - $type',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                Text(
+                  'RWF ${amount.abs().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
+                  style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600),
+                ),
+                if (service.isNotEmpty)
+                  Text(
+                    service,
+                    style: const TextStyle(color: Colors.grey, fontSize: 11),
+                  ),
+              ],
+            ),
+          ),
+          Text(date, style: const TextStyle(color: Colors.grey, fontSize: 12)),
         ],
       ),
     );

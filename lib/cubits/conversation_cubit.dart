@@ -1,28 +1,27 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../services/api_service.dart';
 
 part 'conversation_state.dart';
 
 class ConversationCubit extends Cubit<ConversationState> {
   final String conversationId;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final ApiService _apiService = ApiService();
 
   ConversationCubit(this.conversationId) : super(ConversationInitial());
 
   Future<void> loadMessages() async {
     try {
       emit(ConversationLoading());
-      final snapshot = await _firestore
-          .collection('conversations')
-          .doc(conversationId)
-          .collection('messages')
-          .orderBy('timestamp')
-          .get();
-
-      final messages = snapshot.docs.map((doc) => doc.data()).toList();
-      emit(MessagesLoaded(messages));
+      final response = await _apiService.getMessages(conversationId);
+      
+      if (response['success'] == true) {
+        emit(MessagesLoaded(response['data'] ?? []));
+      } else {
+        emit(MessagesLoaded([]));
+      }
     } catch (e) {
       emit(ConversationError(e.toString()));
     }
@@ -32,46 +31,19 @@ class ConversationCubit extends Cubit<ConversationState> {
     try {
       emit(MessageSending());
       final user = _auth.currentUser;
-      if (user == null) return;
+      if (user == null) {
+        emit(ConversationError('User not logged in'));
+        return;
+      }
 
-      final timestamp = DateTime.now();
-      final userMessage = {
-        'text': message,
-        'isMe': true,
-        'time': _formatTime(timestamp),
-        'timestamp': timestamp.millisecondsSinceEpoch,
-      };
-
-      await _firestore
-          .collection('conversations')
-          .doc(conversationId)
-          .collection('messages')
-          .add(userMessage);
-
-      final aiResponse = _generateFinancialResponse(message, transactions);
-      final aiMessage = {
-        'text': aiResponse,
-        'isMe': false,
-        'time': _formatTime(DateTime.now()),
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-      };
-
-      await _firestore
-          .collection('conversations')
-          .doc(conversationId)
-          .collection('messages')
-          .add(aiMessage);
-
-      await _firestore
-          .collection('conversations')
-          .doc(conversationId)
-          .update({
-            'lastMessage': message,
-            'lastMessageTime': timestamp.toIso8601String(),
-          });
-
-      loadMessages();
-      emit(MessageSent());
+      final response = await _apiService.sendMessage(conversationId, message, user.uid, transactions);
+      
+      if (response['success'] == true) {
+        loadMessages();
+        emit(MessageSent());
+      } else {
+        emit(ConversationError('Failed to send message'));
+      }
     } catch (e) {
       emit(ConversationError(e.toString()));
     }
@@ -117,9 +89,4 @@ class ConversationCubit extends Cubit<ConversationState> {
     return 'I can help you with your financial information. Ask me about your balance, spending, income, recent transactions, or loans!';
   }
 
-  String _formatTime(DateTime dateTime) {
-    final hour = dateTime.hour > 12 ? dateTime.hour - 12 : dateTime.hour;
-    final period = dateTime.hour >= 12 ? 'PM' : 'AM';
-    return '${hour == 0 ? 12 : hour}:${dateTime.minute.toString().padLeft(2, '0')} $period';
-  }
 }

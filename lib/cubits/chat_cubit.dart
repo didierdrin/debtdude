@@ -1,38 +1,25 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
+import '../services/api_service.dart';
 
 part 'chat_state.dart';
 
 class ChatCubit extends Cubit<ChatState> {
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final ApiService _apiService = ApiService();
 
   ChatCubit() : super(ChatInitial());
 
   Future<void> loadConversations() async {
     try {
       emit(ChatLoading());
-      final user = _auth.currentUser;
-      if (user == null) {
+      final response = await _apiService.getConversations();
+      
+      if (response['success'] == true) {
+        emit(ConversationsLoaded(response['data'] ?? []));
+      } else {
         emit(ConversationsLoaded([]));
-        return;
       }
-
-      final snapshot = await _firestore
-          .collection('conversations')
-          .where('userId', isEqualTo: user.uid)
-          .orderBy('lastMessageTime', descending: true)
-          .get();
-
-      final conversations = snapshot.docs.map((doc) => {
-        'id': doc.id,
-        ...doc.data(),
-      }).toList();
-
-      emit(ConversationsLoaded(conversations));
     } catch (e) {
       emit(ChatError(e.toString()));
     }
@@ -46,15 +33,13 @@ class ChatCubit extends Cubit<ChatState> {
         return;
       }
 
-      await _firestore.collection('conversations').add({
-        'title': title,
-        'userId': user.uid,
-        'lastMessage': '',
-        'lastMessageTime': DateTime.now().toIso8601String(),
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
-      loadConversations();
+      final response = await _apiService.createConversation(title, user.uid);
+      
+      if (response['success'] == true) {
+        loadConversations();
+      } else {
+        emit(ChatError('Failed to create conversation'));
+      }
     } catch (e) {
       emit(ChatError(e.toString()));
     }
@@ -72,8 +57,20 @@ class ChatCubit extends Cubit<ChatState> {
         'weeklySpending': weeklySpending,
       }));
     } catch (e) {
-      emit(ChatError(e.toString()));
+      _emitLocalDashboardData(transactions);
     }
+  }
+
+  void _emitLocalDashboardData(List<Map<String, dynamic>> transactions) {
+    final totalBalance = transactions.fold<int>(0, (sum, t) => sum + (t['amount'] as num).toInt());
+    final weeklySpending = transactions
+        .where((t) => (t['amount'] as num) < 0 && _isThisWeek(t['timestamp'] as int))
+        .fold<int>(0, (sum, t) => sum + (t['amount'] as num).abs().toInt());
+
+    emit(DashboardDataLoaded({
+      'totalBalance': totalBalance,
+      'weeklySpending': weeklySpending,
+    }));
   }
 
   bool _isThisWeek(int timestamp) {

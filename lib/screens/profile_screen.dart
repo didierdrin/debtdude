@@ -164,7 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         trackColor: WidgetStateProperty.resolveWith<Color?>(
                           (Set<WidgetState> states) {
                             if (states.contains(WidgetState.selected)) {
-                              return const Color(0xFF5573F6).withOpacity(0.5);
+                              return const Color(0xFF5573F6).withValues(alpha: 0.5);
                             }
                             return null;
                           },
@@ -197,7 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         trackColor: WidgetStateProperty.resolveWith<Color?>(
                           (Set<WidgetState> states) {
                             if (states.contains(WidgetState.selected)) {
-                              return const Color(0xFF5573F6).withOpacity(0.5);
+                              return const Color(0xFF5573F6).withValues(alpha: 0.5);
                             }
                             return null;
                           },

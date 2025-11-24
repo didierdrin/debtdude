@@ -26,7 +26,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _loadDashboardData() {
     _saveFirebaseCubit.getRecentTransactions().listen((transactions) {
-      if (transactions.isNotEmpty) {
+      if (transactions.isNotEmpty && mounted) {
         context.read<ChatCubit>().getDashboardData(transactions);
       }
     });

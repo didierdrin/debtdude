@@ -77,20 +77,20 @@ class NotificationsScreen extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.all(Radius.circular(12)),
       ),
-      child: Row(
+      child: const Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             children: [
-              const CircleAvatar(radius: 22, backgroundColor: Colors.blue),
-              const SizedBox(width: 10),
+              CircleAvatar(radius: 22, backgroundColor: Colors.blue),
+              SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Text(
                     "John - Debt Record",
                     style: TextStyle(fontWeight: FontWeight.bold),
@@ -103,7 +103,7 @@ class NotificationsScreen extends StatelessWidget {
               ),
             ],
           ),
-          const Text("2:15 pm", style: TextStyle(color: Colors.grey)),
+          Text("2:15 pm", style: TextStyle(color: Colors.grey)),
         ],
       ),
     );

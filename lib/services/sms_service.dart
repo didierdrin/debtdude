@@ -7,22 +7,22 @@ class SmsService {
  Future<bool> checkSmsPermission() async {
     try {
       var status = await Permission.sms.status;
-      print('SMS Permission status: $status');
+      // SMS Permission status check
      
       if (!status.isGranted) {
         status = await Permission.sms.request();
-        print('SMS Permission request result: $status');
+        // SMS Permission request result
         
         // If permanently denied, guide user to app settings
         if (status.isPermanentlyDenied) {
           // You can show a dialog here to guide user to app settings
-          print('SMS permission permanently denied. Please enable in app settings.');
+          // SMS permission permanently denied
           return false;
         }
       }
       return status.isGranted;
     } catch (e) {
-      print('Error checking SMS permission: $e');
+      // Error checking SMS permission
       return false;
     }
   }
@@ -30,14 +30,14 @@ class SmsService {
   // Get recent 100 inbox SMS messages (sorted DESC by date)
   Future<List<CustomSmsMessage>> getInboxSms() async {
     try {
-      print('Checking SMS permission...');
+      // Checking SMS permission
       final hasPermission = await checkSmsPermission();
      
       if (!hasPermission) {
         throw Exception('SMS permission denied. Please grant SMS permission in app settings.');
       }
 
-      print('Querying inbox SMS...');
+      // Querying inbox SMS
       final SmsQuery query = SmsQuery();
       
       // Query INBOX only - use package's SmsMessage with explicit type
@@ -54,7 +54,7 @@ class SmsService {
       
       final recentMessages = platformMessages.take(100).toList();
 
-      print('Retrieved ${recentMessages.length} recent inbox SMS');
+      // Retrieved recent inbox SMS
 
       // Map to your CustomSmsMessage model
       return recentMessages.map((pmsg) => CustomSmsMessage(
@@ -64,10 +64,10 @@ class SmsService {
       )).toList();
 
     } on PlatformException catch (e) {
-      print('PlatformException while getting SMS: ${e.message}');
+      // PlatformException while getting SMS
       throw Exception('Failed to get SMS: ${e.message}');
     } catch (e) {
-      print('Error getting SMS: $e');
+      // Error getting SMS
       throw Exception('Failed to get SMS: $e');
     }
   }

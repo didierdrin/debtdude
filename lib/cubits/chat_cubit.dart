@@ -1,4 +1,4 @@
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/api_service.dart';
 
@@ -47,13 +47,15 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> getDashboardData(List<Map<String, dynamic>> transactions) async {
     try {
-      final response = await _apiService.getDashboard(transactions);
-      
-      if (response['success'] == true) {
-        emit(DashboardDataLoaded(response['data']));
-      } else {
-        _emitLocalDashboardData(transactions);
-      }
+      final totalBalance = transactions.fold<int>(0, (total, t) => total + (t['amount'] as num).toInt());
+      final weeklySpending = transactions
+          .where((t) => (t['amount'] as num) < 0 && _isThisWeek(t['timestamp'] as int))
+          .fold<int>(0, (total, t) => total + (t['amount'] as num).abs().toInt());
+
+      emit(DashboardDataLoaded({
+        'totalBalance': totalBalance,
+        'weeklySpending': weeklySpending,
+      }));
     } catch (e) {
       _emitLocalDashboardData(transactions);
     }

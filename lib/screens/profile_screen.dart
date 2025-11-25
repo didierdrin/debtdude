@@ -39,7 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Profile',
                       style: TextStyle(
                         fontSize: 22,
@@ -48,7 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.notifications_none_outlined,
                         color: Theme.of(context).textTheme.titleLarge?.color,
                       ),

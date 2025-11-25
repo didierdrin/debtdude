@@ -88,12 +88,16 @@ class _ConversationScreenState extends State<ConversationScreen> {
                       onTap: () => Navigator.pop(context),
                       child: const Icon(Icons.arrow_back, color: Colors.black),
                     ),
-                    Text(
-                      widget.title,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                    Expanded(
+                      child: Text(
+                        widget.title,
+                        textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 24),
@@ -244,6 +248,8 @@ class _ConversationScreenState extends State<ConversationScreen> {
           children: [
             Text(
               text,
+              overflow: TextOverflow.ellipsis,
+              maxLines: null,
               style: TextStyle(
                 color: isMe ? Colors.white : Colors.black,
                 fontSize: 16,

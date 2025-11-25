@@ -131,7 +131,7 @@ class _HomeContentBody extends StatelessWidget {
                             children: [
                               GestureDetector(
                                 onTap: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen())); 
+                                  // Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen())); 
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.fromLTRB(0, 0, 15, 0),

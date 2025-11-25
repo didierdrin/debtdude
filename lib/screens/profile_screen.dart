@@ -300,7 +300,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       title: const Text('Help & Support'),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {
-                        // Navigate to help
+                        _showHelpDialog();
                       },
                     ),
                     const Divider(height: 1),
@@ -390,6 +390,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  void _showHelpDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Help & Support'),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Need help? Contact our support team:',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+              SizedBox(height: 16),
+              Text('📧 Email Support:'),
+              SizedBox(height: 4),
+              Text('k.konda@alustudent.com'),
+              Text('d.nsengiyumva@alustudent.com'),
+              SizedBox(height: 16),
+              Text('📞 Phone Support:'),
+              SizedBox(height: 4),
+              Text('+254704273083'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
         );
       },
     );

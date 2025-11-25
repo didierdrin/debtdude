@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:debtdude/cubits/theme_cubit.dart';
 import 'package:debtdude/cubits/currency_cubit.dart';
+import 'package:debtdude/cubits/sms_analysis_cubit.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,7 +16,14 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _notificationsEnabled = true;
-  bool _smsAnalysisEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SmsAnalysisCubit>().checkPermissionStatus();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -216,34 +224,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const Divider(height: 1),
            
                     // SMS Analysis Toggle
-                    ListTile(
-                      leading: const Icon(Icons.sms, color: Color(0xFF5573F6)),
-                      title: const Text('SMS Analysis'),
-                      subtitle: const Text('Auto-categorize transactions'),
-                      trailing: Switch(
-                        value: _smsAnalysisEnabled,
-                        onChanged: (value) {
-                          setState(() {
-                            _smsAnalysisEnabled = value;
-                          });
-                        },
-                        thumbColor: WidgetStateProperty.resolveWith<Color?>(
-                          (Set<WidgetState> states) {
-                            if (states.contains(WidgetState.selected)) {
-                              return const Color(0xFF5573F6);
-                            }
-                            return null;
-                          },
-                        ),
-                        trackColor: WidgetStateProperty.resolveWith<Color?>(
-                          (Set<WidgetState> states) {
-                            if (states.contains(WidgetState.selected)) {
-                              return const Color(0xFF5573F6).withValues(alpha: 0.5);
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
+                    BlocBuilder<SmsAnalysisCubit, SmsAnalysisState>(
+                      builder: (context, smsState) {
+                        return ListTile(
+                          leading: const Icon(Icons.sms, color: Color(0xFF5573F6)),
+                          title: const Text('SMS Analysis'),
+                          subtitle: Text(smsState.isEnabled ? 'Auto-categorize transactions' : 'Grant SMS permission to enable'),
+                          trailing: Switch(
+                            value: smsState.isEnabled,
+                            onChanged: (value) {
+                              context.read<SmsAnalysisCubit>().toggleSmsAnalysis();
+                            },
+                            thumbColor: WidgetStateProperty.resolveWith<Color?>(
+                              (Set<WidgetState> states) {
+                                if (states.contains(WidgetState.selected)) {
+                                  return const Color(0xFF5573F6);
+                                }
+                                return null;
+                              },
+                            ),
+                            trackColor: WidgetStateProperty.resolveWith<Color?>(
+                              (Set<WidgetState> states) {
+                                if (states.contains(WidgetState.selected)) {
+                                  return const Color(0xFF5573F6).withValues(alpha: 0.5);
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        );
+                      },
                     ),
            
                     const Divider(height: 1),

@@ -221,7 +221,7 @@ class _HomeContentBody extends StatelessWidget {
                                           ),
                                         );
                                       }
-                                      return const Text(
+                                      return Text(
                                         "RWF ***.**",
                                         style: TextStyle(
                                           color: Theme.of(context).textTheme.bodyLarge?.color,
@@ -260,8 +260,8 @@ class _HomeContentBody extends StatelessWidget {
                         stream: context.read<SaveFirebaseCubit>().getRecentTransactions(),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                            return const Padding(
-                              padding: EdgeInsets.all(20),
+                            return Padding(
+                              padding: const EdgeInsets.all(20),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -270,7 +270,7 @@ class _HomeContentBody extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.black,
+                                      color: Theme.of(context).textTheme.bodyLarge?.color,
                                     ),
                                   ),
                                   SizedBox(height: 12),
@@ -290,7 +290,7 @@ class _HomeContentBody extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
+                                Text(
                                   "Recent Transactions",
                                   style: TextStyle(
                                     fontSize: 18,

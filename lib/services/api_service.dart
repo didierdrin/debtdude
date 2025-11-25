@@ -5,8 +5,8 @@ class ApiService {
   static const String geminiApiKey = 'AIzaSyDDkWO6fsx_E0BemYQDB4M_WPXXlY_eJ2U';
   static const String geminiApiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
   
-  static List<Map<String, dynamic>> _conversations = [];
-  static Map<String, List<Map<String, dynamic>>> _messages = {};
+  static final List<Map<String, dynamic>> _conversations = [];
+  static final Map<String, List<Map<String, dynamic>>> _messages = {};
 
   Future<Map<String, dynamic>> getConversations() async {
     return {'success': true, 'data': _conversations};

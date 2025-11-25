@@ -2,6 +2,8 @@ import 'package:debtdude/screens/notifications_screen.dart';
 import 'package:debtdude/screens/signup_signin_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:debtdude/cubits/theme_cubit.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,7 +20,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
      
       body: SafeArea(
         child: Padding(
@@ -172,6 +174,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
            
+                    const Divider(height: 1),
+
+                    // Theme Toggle
+                    BlocBuilder<ThemeCubit, ThemeState>(
+                      builder: (context, themeState) {
+                        final isDark = themeState.themeMode == ThemeMode.dark;
+                        return ListTile(
+                          leading: Icon(
+                            isDark ? Icons.dark_mode : Icons.light_mode,
+                            color: const Color(0xFF5573F6),
+                          ),
+                          title: const Text('Dark Mode'),
+                          subtitle: Text(isDark ? 'Dark theme enabled' : 'Light theme enabled'),
+                          trailing: Switch(
+                            value: isDark,
+                            onChanged: (value) {
+                              context.read<ThemeCubit>().toggleTheme();
+                            },
+                            thumbColor: WidgetStateProperty.resolveWith<Color?>(
+                              (Set<WidgetState> states) {
+                                if (states.contains(WidgetState.selected)) {
+                                  return const Color(0xFF5573F6);
+                                }
+                                return null;
+                              },
+                            ),
+                            trackColor: WidgetStateProperty.resolveWith<Color?>(
+                              (Set<WidgetState> states) {
+                                if (states.contains(WidgetState.selected)) {
+                                  return const Color(0xFF5573F6).withValues(alpha: 0.5);
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+
                     const Divider(height: 1),
            
                     // SMS Analysis Toggle

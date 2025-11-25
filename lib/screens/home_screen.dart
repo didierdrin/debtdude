@@ -7,6 +7,7 @@ import 'stats_screen.dart';
 import 'chat_screen.dart';
 import 'profile_screen.dart';
 import 'package:debtdude/widgets/dialog_box.dart';
+import 'package:debtdude/widgets/theme_toggle.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -42,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
           currentIndex: _currentIndex,
           selectedItemColor: const Color(0xFF5573F6),
           unselectedItemColor: Colors.grey,
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           elevation: 0,
           onTap: (index) {
             setState(() {
@@ -171,7 +172,7 @@ class _HomeContentBody extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(width: 40),
+                          const ThemeToggle(),
                         ],
                       ),
                     ),
@@ -181,7 +182,7 @@ class _HomeContentBody extends StatelessWidget {
                   Container(
                     width: 320,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: const [
                         BoxShadow(
@@ -212,9 +213,9 @@ class _HomeContentBody extends StatelessWidget {
                                     builder: (context, snapshot) {
                                       if (snapshot.hasData && snapshot.data != null) {
                                         return Text(
-                                          "RWF ${snapshot.data!.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}",
-                                          style: const TextStyle(
-                                            color: Colors.black,
+                                          "RWF ${snapshot.data!.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}\n",
+                                          style: TextStyle(
+                                            color: Theme.of(context).textTheme.bodyLarge?.color,
                                             fontSize: 28,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -223,7 +224,7 @@ class _HomeContentBody extends StatelessWidget {
                                       return const Text(
                                         "RWF ***.**",
                                         style: TextStyle(
-                                          color: Colors.black,
+                                          color: Theme.of(context).textTheme.bodyLarge?.color,
                                           fontSize: 28,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -294,7 +295,7 @@ class _HomeContentBody extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                                    color: Theme.of(context).textTheme.bodyLarge?.color,
                                   ),
                                 ),
                                 const SizedBox(height: 12),
@@ -328,10 +329,10 @@ class _HomeContentBody extends StatelessWidget {
                                         margin: const EdgeInsets.only(bottom: 10),
                                         padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
-                                          color: Colors.grey[50],
+                                          color: Theme.of(context).cardColor,
                                           borderRadius: BorderRadius.circular(8),
                                           border: Border.all(
-                                            color: Colors.grey[200]!,
+                                            color: Theme.of(context).dividerColor,
                                             width: 1,
                                           ),
                                         ),
@@ -344,10 +345,10 @@ class _HomeContentBody extends StatelessWidget {
                                                 children: [
                                                   Text(
                                                     tx["name"],
-                                                    style: const TextStyle(
+                                                    style: TextStyle(
                                                       fontWeight: FontWeight.bold,
                                                       fontSize: 16,
-                                                      color: Colors.black,
+                                                      color: Theme.of(context).textTheme.bodyLarge?.color,
                                                     ),
                                                     overflow: TextOverflow.ellipsis,
                                                   ),

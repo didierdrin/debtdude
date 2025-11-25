@@ -26,8 +26,39 @@ class AuthScreenContentState extends State<AuthScreenContent> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   bool _isSignUp = false; // Changed to false to start with sign-in
   bool _obscurePassword = true;
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your email address';
+    }
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+      return 'Please enter a valid email address';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your password';
+    }
+    if (_isSignUp && value.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
+
+  String? _validateConfirmPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please confirm your password';
+    }
+    if (value != _passwordController.text) {
+      return 'Passwords do not match';
+    }
+    return null;
+  }
 
 
 
@@ -55,9 +86,11 @@ class AuthScreenContentState extends State<AuthScreenContent> {
                     MediaQuery.of(context).padding.bottom,
               ),
               child: IntrinsicHeight(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
               
 
                     // Form Section
@@ -70,14 +103,16 @@ class AuthScreenContentState extends State<AuthScreenContent> {
                                 height: 350, width: 350),
                           ),
                           if (_isSignUp) ...[
-                            TextField(
+                            TextFormField(
                               controller: _usernameController,
+                              validator: _validateEmail,
                               decoration:
                                   const InputDecoration(labelText: 'Email'),
                             ),
                             const SizedBox(height: 16),
-                            TextField(
+                            TextFormField(
                               controller: _passwordController,
+                              validator: _validatePassword,
                               obscureText: _obscurePassword,
                               decoration: InputDecoration(
                                 labelText: 'Password',
@@ -96,8 +131,9 @@ class AuthScreenContentState extends State<AuthScreenContent> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            TextField(
+                            TextFormField(
                               controller: _confirmPasswordController,
+                              validator: _validateConfirmPassword,
                               obscureText: _obscurePassword,
                               decoration: InputDecoration(
                                 labelText: 'Confirm Password',
@@ -116,14 +152,16 @@ class AuthScreenContentState extends State<AuthScreenContent> {
                               ),
                             ),
                           ] else ...[
-                            TextField(
+                            TextFormField(
                               controller: _usernameController,
+                              validator: _validateEmail,
                               decoration:
                                   const InputDecoration(labelText: 'Email'),
                             ),
                             const SizedBox(height: 16),
-                            TextField(
+                            TextFormField(
                               controller: _passwordController,
+                              validator: _validatePassword,
                               obscureText: _obscurePassword,
                               decoration: InputDecoration(
                                 labelText: 'Password',
@@ -148,17 +186,19 @@ class AuthScreenContentState extends State<AuthScreenContent> {
                               return ElevatedButton(
                                 style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo, minimumSize: const Size(double.infinity, 50)),
                                 onPressed: state is AuthLoading ? null : () {
-                                  if (_isSignUp) {
-                                    context.read<AuthCubit>().signUp(
-                                      _usernameController.text,
-                                      _passwordController.text,
-                                      _confirmPasswordController.text,
-                                    );
-                                  } else {
-                                    context.read<AuthCubit>().signIn(
-                                      _usernameController.text,
-                                      _passwordController.text,
-                                    );
+                                  if (_formKey.currentState!.validate()) {
+                                    if (_isSignUp) {
+                                      context.read<AuthCubit>().signUp(
+                                        _usernameController.text,
+                                        _passwordController.text,
+                                        _confirmPasswordController.text,
+                                      );
+                                    } else {
+                                      context.read<AuthCubit>().signIn(
+                                        _usernameController.text,
+                                        _passwordController.text,
+                                      );
+                                    }
                                   }
                                 },
                                 child: state is AuthLoading
@@ -184,7 +224,8 @@ class AuthScreenContentState extends State<AuthScreenContent> {
                         ],
                       ),
                     ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

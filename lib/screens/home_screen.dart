@@ -8,6 +8,8 @@ import 'chat_screen.dart';
 import 'profile_screen.dart';
 import 'package:debtdude/widgets/dialog_box.dart';
 import 'package:debtdude/widgets/theme_toggle.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:debtdude/cubits/currency_cubit.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -366,13 +368,19 @@ class _HomeContentBody extends StatelessWidget {
                                               crossAxisAlignment: CrossAxisAlignment.end,
                                               children: [
                                                 Text(
-                                                  (isIncome
-                                                      ? "+RWF ${tx['amount']}"
-                                                      : "-RWF ${tx['amount'].abs()}"),
-                                                  style: TextStyle(
-                                                    color: isIncome ? const Color(0xFF4CAF50) : const Color(0xFFF44336),
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 15,
+                                                  BlocBuilder<CurrencyCubit, CurrencyState>(
+                                                    builder: (context, currencyState) {
+                                                      return Text(
+                                                        (isIncome
+                                                            ? "+${context.read<CurrencyCubit>().formatAmount(tx['amount'])}"
+                                                            : "-${context.read<CurrencyCubit>().formatAmount(tx['amount'].abs())}"),
+                                                        style: TextStyle(
+                                                          color: isIncome ? const Color(0xFF4CAF50) : const Color(0xFFF44336),
+                                                          fontWeight: FontWeight.bold,
+                                                          fontSize: 15,
+                                                        ),
+                                                      );
+                                                    },
                                                   ),
                                                 ),
                                                 Text(

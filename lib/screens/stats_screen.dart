@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:debtdude/widgets/dialog_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:debtdude/cubits/save_firebase_cubit.dart';
+import 'package:debtdude/cubits/currency_cubit.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -100,7 +101,7 @@ class _StatsScreenState extends State<StatsScreen> {
   Widget _buildStatsScreen(BuildContext context, List<Map<String, dynamic>> currentRecords, List<Map<String, dynamic>> currentData, double totalAmount) {
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -277,12 +278,16 @@ class _StatsScreenState extends State<StatsScreen> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                'RWF${item['amount']}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
+                              BlocBuilder<CurrencyCubit, CurrencyState>(
+                                builder: (context, currencyState) {
+                                  return Text(
+                                    context.read<CurrencyCubit>().formatAmount(item['amount']),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -393,15 +398,19 @@ class _StatsScreenState extends State<StatsScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  Text(
-                                    'RWF${(record['amount'] as num).abs()}',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: _selectedTab == 0
-                                          ? const Color(0xFF4CAF50)
-                                          : const Color(0xFFF44336),
-                                    ),
+                                  BlocBuilder<CurrencyCubit, CurrencyState>(
+                                    builder: (context, currencyState) {
+                                      return Text(
+                                        context.read<CurrencyCubit>().formatAmount((record['amount'] as num).abs()),
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: _selectedTab == 0
+                                              ? const Color(0xFF4CAF50)
+                                              : const Color(0xFFF44336),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ],
                               ),
@@ -448,13 +457,17 @@ class _StatsScreenState extends State<StatsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              'RWF${_getTotalAmount(data).toStringAsFixed(0)}',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+            BlocBuilder<CurrencyCubit, CurrencyState>(
+              builder: (context, currencyState) {
+                return Text(
+                  context.read<CurrencyCubit>().formatAmount(_getTotalAmount(data)),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                );
+              },
             ),
             Text(
               _selectedTab == 0 ? 'Total Income' : 'Total Expenses',

@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:debtdude/cubits/theme_cubit.dart';
+import 'package:debtdude/cubits/currency_cubit.dart';
+import 'package:debtdude/cubits/sms_analysis_cubit.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -14,8 +16,14 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _notificationsEnabled = true;
-  bool _smsAnalysisEnabled = true;
-  String _selectedCurrency = 'RWF';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SmsAnalysisCubit>().checkPermissionStatus();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,13 +44,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: Theme.of(context).textTheme.titleLarge?.color,
                       ),
                     ),
                     IconButton(
                       icon: const Icon(
                         Icons.notifications_none_outlined,
-                        color: Colors.black,
+                        color: Theme.of(context).textTheme.titleLarge?.color,
                       ),
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
@@ -54,7 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -114,7 +122,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // Settings Section
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -216,49 +224,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const Divider(height: 1),
            
                     // SMS Analysis Toggle
-                    ListTile(
-                      leading: const Icon(Icons.sms, color: Color(0xFF5573F6)),
-                      title: const Text('SMS Analysis'),
-                      subtitle: const Text('Auto-categorize transactions'),
-                      trailing: Switch(
-                        value: _smsAnalysisEnabled,
-                        onChanged: (value) {
-                          setState(() {
-                            _smsAnalysisEnabled = value;
-                          });
-                        },
-                        thumbColor: WidgetStateProperty.resolveWith<Color?>(
-                          (Set<WidgetState> states) {
-                            if (states.contains(WidgetState.selected)) {
-                              return const Color(0xFF5573F6);
-                            }
-                            return null;
-                          },
-                        ),
-                        trackColor: WidgetStateProperty.resolveWith<Color?>(
-                          (Set<WidgetState> states) {
-                            if (states.contains(WidgetState.selected)) {
-                              return const Color(0xFF5573F6).withValues(alpha: 0.5);
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
+                    BlocBuilder<SmsAnalysisCubit, SmsAnalysisState>(
+                      builder: (context, smsState) {
+                        return ListTile(
+                          leading: const Icon(Icons.sms, color: Color(0xFF5573F6)),
+                          title: const Text('SMS Analysis'),
+                          subtitle: Text(smsState.isEnabled ? 'Auto-categorize transactions' : 'Grant SMS permission to enable'),
+                          trailing: Switch(
+                            value: smsState.isEnabled,
+                            onChanged: (value) {
+                              context.read<SmsAnalysisCubit>().toggleSmsAnalysis();
+                            },
+                            thumbColor: WidgetStateProperty.resolveWith<Color?>(
+                              (Set<WidgetState> states) {
+                                if (states.contains(WidgetState.selected)) {
+                                  return const Color(0xFF5573F6);
+                                }
+                                return null;
+                              },
+                            ),
+                            trackColor: WidgetStateProperty.resolveWith<Color?>(
+                              (Set<WidgetState> states) {
+                                if (states.contains(WidgetState.selected)) {
+                                  return const Color(0xFF5573F6).withValues(alpha: 0.5);
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        );
+                      },
                     ),
            
                     const Divider(height: 1),
            
                     // Currency Selection
-                    ListTile(
-                      leading: const Icon(
-                        Icons.attach_money,
-                        color: Color(0xFF5573F6),
-                      ),
-                      title: const Text('Currency'),
-                      subtitle: Text('Current: $_selectedCurrency'),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                      onTap: () {
-                        _showCurrencyDialog();
+                    BlocBuilder<CurrencyCubit, CurrencyState>(
+                      builder: (context, currencyState) {
+                        return ListTile(
+                          leading: const Icon(
+                            Icons.attach_money,
+                            color: Color(0xFF5573F6),
+                          ),
+                          title: const Text('Currency'),
+                          subtitle: Text('Current: ${currencyState.currency}'),
+                          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                          onTap: () {
+                            _showCurrencyDialog();
+                          },
+                        );
                       },
                     ),
                   ],
@@ -270,7 +284,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // Menu Options
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -322,7 +336,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -357,39 +371,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Select Currency'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: const Text('Rwandan Franc (RWF)'),
-                leading: Icon(
-                  _selectedCurrency == 'RWF' ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                  color: const Color(0xFF5573F6),
-                ),
-                onTap: () {
-                  setState(() {
-                    _selectedCurrency = 'RWF';
-                  });
-                  Navigator.pop(context);
-                },
+        return BlocBuilder<CurrencyCubit, CurrencyState>(
+          builder: (context, currencyState) {
+            return AlertDialog(
+              title: const Text('Select Currency'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    title: const Text('Rwandan Franc (RWF)'),
+                    leading: Icon(
+                      currencyState.currency == 'RWF' ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                      color: const Color(0xFF5573F6),
+                    ),
+                    onTap: () {
+                      context.read<CurrencyCubit>().changeCurrency('RWF');
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('US Dollar (USD)'),
+                    leading: Icon(
+                      currencyState.currency == 'USD' ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                      color: const Color(0xFF5573F6),
+                    ),
+                    onTap: () {
+                      context.read<CurrencyCubit>().changeCurrency('USD');
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
               ),
-              ListTile(
-                title: const Text('US Dollar (USD)'),
-                leading: Icon(
-                  _selectedCurrency == 'USD' ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                  color: const Color(0xFF5573F6),
-                ),
-                onTap: () {
-                  setState(() {
-                    _selectedCurrency = 'USD';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );

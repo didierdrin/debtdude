@@ -75,7 +75,7 @@ class AuthScreenContentState extends State<AuthScreenContent> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16.0, 8, 16, 8),
@@ -99,8 +99,13 @@ class AuthScreenContentState extends State<AuthScreenContent> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Center(
-                            child: Image.asset("assets/images/logo.png",
-                                height: 350, width: 350),
+                            child: Image.asset(
+                              Theme.of(context).brightness == Brightness.dark
+                                  ? "assets/images/logo_dark.png"
+                                  : "assets/images/logo.png",
+                              height: 350, 
+                              width: 350
+                            ),
                           ),
                           if (_isSignUp) ...[
                             TextFormField(
@@ -217,9 +222,12 @@ class AuthScreenContentState extends State<AuthScreenContent> {
                                 _confirmPasswordController.clear();
                               });
                             },
-                            child: Text(_isSignUp
-                                ? 'Have an account? Sign In'
-                                : 'Don\'t have an account? Sign Up'),
+                            child: Text(
+                              _isSignUp
+                                  ? 'Have an account? Sign In'
+                                  : 'Don\'t have an account? Sign Up',
+                              style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                            ),
                           ),
                         ],
                       ),

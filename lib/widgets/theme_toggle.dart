@@ -11,6 +11,7 @@ class ThemeToggle extends StatelessWidget {
       builder: (context, state) {
         final isDark = state.themeMode == ThemeMode.dark;
         return IconButton(
+          style: ButtonStyle(iconColor: MaterialStateProperty.all(Colors.white)), 
           icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
           onPressed: () => context.read<ThemeCubit>().toggleTheme(),
           tooltip: isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',

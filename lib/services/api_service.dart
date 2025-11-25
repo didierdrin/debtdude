@@ -1,12 +1,31 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart'; 
 
 class ApiService {
-  static const String geminiApiKey = 'AIzaSyDDkWO6fsx_E0BemYQDB4M_WPXXlY_eJ2U';
+  static String? _geminiApiKey; 
   static const String geminiApiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
   
   static final List<Map<String, dynamic>> _conversations = [];
   static final Map<String, List<Map<String, dynamic>>> _messages = {};
+
+
+
+  // Initialize API key from secure storage
+  static Future<void> initializeApiKey() async {
+    try {
+      // Option 1: Load from assets (create assets/config/api_keys.json)
+      final String response = await rootBundle.loadString('assets/config/api_keys.json');
+      final data = json.decode(response);
+      _geminiApiKey = data['gemini_api_key'];
+    } catch (e) {
+      // Fallback: Use environment variable or show error
+      _geminiApiKey = const String.fromEnvironment('GEMINI_API_KEY');
+      if (_geminiApiKey == null || _geminiApiKey!.isEmpty) {
+        throw Exception('Gemini API key not found. Please configure your API key.');
+      }
+    }
+  }
 
   Future<Map<String, dynamic>> getConversations() async {
     return {'success': true, 'data': _conversations};
@@ -61,16 +80,22 @@ class ApiService {
       _conversations[conversationIndex]['lastMessageTime'] = DateTime.now().toIso8601String();
     }
     
-    return {'success': true, 'data': {'userMessage': userMessage, 'aiMessage': aiMessage}};
+    return {'success': true, 'data': {'userMessage': userMessage, 'aiMessage': aiMessage, 'response': aiResponse}};
   }
+
+
 
   Future<String> _generateChatResponse(String message, List<Map<String, dynamic>>? transactions) async {
     try {
+      if (_geminiApiKey == null) {
+        await initializeApiKey();
+      }
+
       final analysis = _analyzeTransactions(transactions ?? []);
       final prompt = 'You are DebtDude, a financial assistant. Based on the user\'s transaction data and their message: "$message", provide a helpful response about their finances.\n\nRecent transactions summary:\n${json.encode(analysis)}\n\nRespond in a conversational, helpful manner. Keep responses concise and actionable.';
       
       final response = await http.post(
-        Uri.parse('$geminiApiUrl?key=$geminiApiKey'),
+        Uri.parse('$geminiApiUrl?key=$_geminiApiKey'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'contents': [{
@@ -86,12 +111,53 @@ class ApiService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         return data['candidates'][0]['content']['parts'][0]['text'];
+      } else if (response.statusCode == 429) {
+        // Rate limit exceeded - provide intelligent fallback
+        return _generateFallbackResponse(message, analysis);
+      } else {
+        print('API Error: ${response.statusCode} - ${response.body}');
+        return _generateFallbackResponse(message, analysis);
       }
-      return 'Sorry, I\'m having trouble processing your request right now. Please try again later.';
     } catch (e) {
-      return 'Sorry, I\'m having trouble processing your request right now. Please try again later.';
+      print('Error generating response: $e');
+      return _generateFallbackResponse(message, transactions != null ? _analyzeTransactions(transactions) : {});
     }
   }
+
+  String _generateFallbackResponse(String message, Map<String, dynamic> analysis) {
+    final lowerMessage = message.toLowerCase();
+    
+    // Balance inquiry
+    if (lowerMessage.contains('balance') || lowerMessage.contains('money')) {
+      final netAmount = analysis['netAmount'] ?? 0.0;
+      if (netAmount > 0) {
+        return 'Based on your recent transactions, you have a positive net flow of ${netAmount.toStringAsFixed(0)} RWF. Keep up the good financial management!';
+      } else {
+        return 'Your recent transactions show a net outflow of ${netAmount.abs().toStringAsFixed(0)} RWF. Consider reviewing your spending patterns.';
+      }
+    }
+    
+    // Spending inquiry
+    if (lowerMessage.contains('spend') || lowerMessage.contains('expense')) {
+      final totalSpent = analysis['totalSpent'] ?? 0.0;
+      return 'You\'ve spent ${totalSpent.toStringAsFixed(0)} RWF recently. ${totalSpent > 50000 ? "Consider tracking your expenses more closely." : "Your spending looks reasonable."}';
+    }
+    
+    // Income inquiry
+    if (lowerMessage.contains('income') || lowerMessage.contains('receive')) {
+      final totalReceived = analysis['totalReceived'] ?? 0.0;
+      return 'You\'ve received ${totalReceived.toStringAsFixed(0)} RWF recently. ${totalReceived > 0 ? "Great job on maintaining income flow!" : "Consider exploring additional income sources."}';
+    }
+    
+    // General advice
+    if (lowerMessage.contains('advice') || lowerMessage.contains('help')) {
+      return 'Here are some quick tips: Track your daily expenses, set a monthly budget, save at least 10% of your income, and avoid unnecessary debt. Would you like specific advice about any of these areas?';
+    }
+    
+    // Default response
+    return 'I\'m currently experiencing high demand and my AI responses are temporarily limited. However, I can see you have ${analysis['transactionCount'] ?? 0} recent transactions. Feel free to ask about your balance, spending, or income for basic insights!';
+  }
+
 
   Map<String, dynamic> _analyzeTransactions(List<Map<String, dynamic>> transactions, [String period = 'week']) {
     final now = DateTime.now();

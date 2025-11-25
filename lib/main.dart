@@ -1,3 +1,4 @@
+import 'package:debtdude/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,15 +8,29 @@ import 'package:debtdude/cubits/chat_cubit.dart';
 import 'package:debtdude/cubits/theme_cubit.dart';
 import 'package:debtdude/cubits/currency_cubit.dart';
 import 'package:debtdude/cubits/sms_analysis_cubit.dart';
+import 'package:debtdude/cubits/save_firebase_cubit.dart';
+import 'package:debtdude/cubits/notification_cubit.dart';
+import 'package:debtdude/services/notification_service.dart';
 import 'package:debtdude/theme/app_theme.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
+// Background message handler
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('Handling a background message: ${message.messageId}');
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+  await ApiService.initializeApiKey();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Set background message handler
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   runApp(const MyApp());
 }
@@ -31,6 +46,15 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => ThemeCubit()),
         BlocProvider(create: (context) => CurrencyCubit()),
         BlocProvider(create: (context) => SmsAnalysisCubit()),
+        BlocProvider(create: (context) => SaveFirebaseCubit()),
+        BlocProvider(create: (context) {
+          final cubit = NotificationCubit();
+          // Initialize after a short delay to ensure everything is ready
+          Future.delayed(const Duration(milliseconds: 100), () {
+            cubit.initialize();
+          });
+          return cubit;
+        }),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, themeState) {

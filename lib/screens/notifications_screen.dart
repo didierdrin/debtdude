@@ -16,21 +16,21 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         automaticallyImplyLeading: false,
-        title: const Text(
+        title: Text(
           "Notifications",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.close, color: Colors.black),
+            icon: Icon(Icons.close, color: Theme.of(context).textTheme.bodyLarge?.color),
             onPressed: () => Navigator.pop(context),
           ),
         ],
       ),
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           Padding(
@@ -38,9 +38,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _topButton("WITHDRAW", 0),
+                _topButton("SENT", 0),
                 _topButton("RECEIVED", 1),
-                _topButton("TRACKING", 2),
+                // _topButton("TRACKING", 2),
               ],
             ),
           ),
@@ -86,7 +86,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? Colors.indigoAccent : Colors.white,
+          color: isActive ? Colors.indigoAccent : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Colors.indigoAccent),
         ),
@@ -144,7 +144,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), blurRadius: 4, offset: const Offset(0, 2))],
       ),
@@ -162,7 +162,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               children: [
                 Text(
                   '$name - $type',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Theme.of(context).textTheme.bodyLarge?.color),
                 ),
                 Text(
                   'RWF ${amount.abs().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',

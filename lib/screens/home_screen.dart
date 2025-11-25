@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:debtdude/cubits/save_firebase_cubit.dart';
+import 'package:debtdude/cubits/currency_cubit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'stats_screen.dart';
 import 'chat_screen.dart';
 import 'profile_screen.dart';
+import 'conversation_screen.dart';
 import 'package:debtdude/widgets/dialog_box.dart';
 import 'package:debtdude/widgets/theme_toggle.dart';
 
@@ -83,26 +85,35 @@ class HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => SaveFirebaseCubit()..readAndSaveSmsToFirebase(),
-      child: const _HomeContentBody(),
-    );
+    // Trigger SMS reading when HomeContent is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SaveFirebaseCubit>().readAndSaveSmsToFirebase();
+    });
+    
+    return const _HomeContentBody();
   }
 }
 
-class _HomeContentBody extends StatelessWidget {
+class _HomeContentBody extends StatefulWidget {
   const _HomeContentBody();
+
+  @override
+  State<_HomeContentBody> createState() => _HomeContentBodyState();
+}
+
+class _HomeContentBodyState extends State<_HomeContentBody> {
+  final Set<String> _readTransactions = {};
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF5573F6),
-              Colors.white,
+              const Color(0xFF5573F6),
+              Theme.of(context).scaffoldBackgroundColor,
             ],
           ),
         ),
@@ -138,7 +149,7 @@ class _HomeContentBody extends StatelessWidget {
                                   padding: const EdgeInsets.fromLTRB(0, 0, 15, 0),
                                   child: CircleAvatar(
                                     radius: 22,
-                                    backgroundColor: Colors.white,
+                                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                                     child: Text(
                                       FirebaseAuth.instance.currentUser?.email?.isNotEmpty == true
                                           ? FirebaseAuth.instance.currentUser!.email![0].toUpperCase()
@@ -212,22 +223,30 @@ class _HomeContentBody extends StatelessWidget {
                                     stream: context.read<SaveFirebaseCubit>().getMostRecentBalance(),
                                     builder: (context, snapshot) {
                                       if (snapshot.hasData && snapshot.data != null) {
-                                        return Text(
-                                          "RWF ${snapshot.data!.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}\n",
-                                          style: TextStyle(
-                                            color: Theme.of(context).textTheme.bodyLarge?.color,
-                                            fontSize: 28,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                        return BlocBuilder<CurrencyCubit, CurrencyState>(
+                                          builder: (context, currencyState) {
+                                            return Text(
+                                              "${context.read<CurrencyCubit>().formatAmount(snapshot.data!)}",
+                                              style: TextStyle(
+                                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                                                fontSize: 28,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            );
+                                          },
                                         );
                                       }
-                                      return Text(
-                                        "RWF ***.**",
-                                        style: TextStyle(
-                                          color: Theme.of(context).textTheme.bodyLarge?.color,
-                                          fontSize: 28,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                      return BlocBuilder<CurrencyCubit, CurrencyState>(
+                                        builder: (context, currencyState) {
+                                          return Text(
+                                            "${currencyState.symbol} ***.**",
+                                            style: TextStyle(
+                                              color: Theme.of(context).textTheme.bodyLarge?.color,
+                                              fontSize: 28,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          );
+                                        },
                                       );
                                     },
                                   ),
@@ -236,6 +255,7 @@ class _HomeContentBody extends StatelessWidget {
                                     "Today, ${DateFormat('MMM dd, yyyy').format(DateTime.now())}",
                                     style: const TextStyle(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w700),
                                   ),
+                                  const SizedBox(height: 8),
                                 ],
                               ),
                             ],
@@ -303,6 +323,9 @@ class _HomeContentBody extends StatelessWidget {
                                   children: transactions.map((tx) {
                                     bool isIncome = tx["amount"] > 0;
 
+                                    final transactionId = "${tx['name']}_${tx['timestamp']}";
+                                    final isRead = _readTransactions.contains(transactionId);
+
                                     return GestureDetector(
                                       onTap: () {
                                         showDialog(
@@ -313,13 +336,22 @@ class _HomeContentBody extends StatelessWidget {
                                               content: "${tx["type"]} - ${tx["date"]}",
                                               onAskDebtDude: () {
                                                 Navigator.pop(context);
-                                                // Add your Ask DebtDude functionality here
-                                                // Ask DebtDude pressed
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => ConversationScreen(
+                                                      conversationId: 'transaction_${tx['timestamp']}',
+                                                      title: 'DebtDude Chat',
+                                                      initialMessage: 'Tell me about this transaction: ${tx['name']} - ${tx['type']} for ${context.read<CurrencyCubit>().formatAmount(tx['amount'].abs())} on ${tx['date']}',
+                                                    ),
+                                                  ),
+                                                );
                                               },
                                               onMarkAsRead: () {
                                                 Navigator.pop(context);
-                                                // Add your Mark as Read functionality here
-                                                // Mark as Read pressed
+                                                setState(() {
+                                                  _readTransactions.add(transactionId);
+                                                });
                                               },
                                             );
                                           },
@@ -332,7 +364,7 @@ class _HomeContentBody extends StatelessWidget {
                                           color: Theme.of(context).cardColor,
                                           borderRadius: BorderRadius.circular(8),
                                           border: Border.all(
-                                            color: Theme.of(context).dividerColor,
+                                            color: isRead ? Colors.transparent : Theme.of(context).dividerColor,
                                             width: 1,
                                           ),
                                         ),
@@ -365,15 +397,19 @@ class _HomeContentBody extends StatelessWidget {
                                             Column(
                                               crossAxisAlignment: CrossAxisAlignment.end,
                                               children: [
-                                                Text(
-                                                  (isIncome
-                                                      ? "+RWF ${tx['amount']}"
-                                                      : "-RWF ${tx['amount'].abs()}"),
-                                                  style: TextStyle(
-                                                    color: isIncome ? const Color(0xFF4CAF50) : const Color(0xFFF44336),
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 15,
-                                                  ),
+                                                BlocBuilder<CurrencyCubit, CurrencyState>(
+                                                  builder: (context, currencyState) {
+                                                    return Text(
+                                                      (isIncome
+                                                          ? "+${context.read<CurrencyCubit>().formatAmount(tx['amount'])}"
+                                                          : "-${context.read<CurrencyCubit>().formatAmount(tx['amount'].abs())}"),
+                                                      style: TextStyle(
+                                                        color: isIncome ? const Color(0xFF4CAF50) : const Color(0xFFF44336),
+                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: 15,
+                                                      ),
+                                                    );
+                                                  },
                                                 ),
                                                 Text(
                                                   tx["date"],

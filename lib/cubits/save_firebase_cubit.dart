@@ -375,7 +375,7 @@ Future<void> readAndSaveSmsToFirebase() async {
   }
 
 
-  // Get recent transactions (last 10)
+  // Get recent transactions (all transactions for stats)
   Stream<List<Map<String, dynamic>>> getRecentTransactions() {
     final user = _auth.currentUser;
     if (user == null) {
@@ -391,10 +391,9 @@ Future<void> readAndSaveSmsToFirebase() async {
           final data = snapshot.data() as Map<String, dynamic>;
           final transactions = data['transactions'] as List<dynamic>? ?? [];
           
-          // Convert to List<Map<String, dynamic>> and take last 10
+          // Convert to List<Map<String, dynamic>> - return all for stats
           return transactions
               .cast<Map<String, dynamic>>()
-              .take(10)
               .toList();
         });
   }

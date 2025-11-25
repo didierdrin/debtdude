@@ -8,7 +8,6 @@ import 'chat_screen.dart';
 import 'profile_screen.dart';
 import 'package:debtdude/widgets/dialog_box.dart';
 import 'package:debtdude/widgets/theme_toggle.dart';
-import 'package:debtdude/cubits/currency_cubit.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

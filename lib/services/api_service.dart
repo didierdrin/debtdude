@@ -14,15 +14,16 @@ class ApiService {
   // Initialize API key from secure storage
   static Future<void> initializeApiKey() async {
     try {
-      // Option 1: Load from assets (create assets/config/api_keys.json)
+      // Try to load from assets first
       final String response = await rootBundle.loadString('assets/config/api_keys.json');
       final data = json.decode(response);
       _geminiApiKey = data['gemini_api_key'];
     } catch (e) {
-      // Fallback: Use environment variable or show error
+      // Fallback: Use environment variable or continue without API
       _geminiApiKey = const String.fromEnvironment('GEMINI_API_KEY');
       if (_geminiApiKey == null || _geminiApiKey!.isEmpty) {
-        throw Exception('Gemini API key not found. Please configure your API key.');
+        print('Gemini API key not found. Chat features will use fallback responses.');
+        _geminiApiKey = null; // Allow app to continue without API
       }
     }
   }

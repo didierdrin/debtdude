@@ -1,4 +1,5 @@
 import 'package:debtdude/screens/notifications_screen.dart';
+import 'package:debtdude/screens/conversation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:debtdude/widgets/dialog_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,6 +15,7 @@ class StatsScreen extends StatefulWidget {
 
 class _StatsScreenState extends State<StatsScreen> {
   int _selectedTab = 0; // 0 for Income, 1 for Outcome
+  final Set<String> _readTransactions = {};
 
   List<Map<String, dynamic>> _calculateCategoryData(List<Map<String, dynamic>> transactions, bool isIncome) {
     final categoryTotals = <String, int>{};
@@ -112,18 +114,18 @@ class _StatsScreenState extends State<StatsScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Stats',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.notifications_none_outlined,
-                      color: Colors.black,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                     onPressed: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())); 
@@ -136,7 +138,7 @@ class _StatsScreenState extends State<StatsScreen> {
               // Income and Outcome tabs
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[800] : Colors.grey[100],
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -167,7 +169,7 @@ class _StatsScreenState extends State<StatsScreen> {
                                 fontWeight: FontWeight.bold,
                                 color: _selectedTab == 0
                                     ? Colors.white
-                                    : Colors.black,
+                                    : Theme.of(context).textTheme.bodyLarge?.color,
                               ),
                             ),
                           ),
@@ -194,13 +196,13 @@ class _StatsScreenState extends State<StatsScreen> {
                           ),
                           child: Center(
                             child: Text(
-                              'Outcome',
+                              'Expenses',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 color: _selectedTab == 1
                                     ? Colors.white
-                                    : Colors.black,
+                                    : Theme.of(context).textTheme.bodyLarge?.color,
                               ),
                             ),
                           ),
@@ -216,7 +218,7 @@ class _StatsScreenState extends State<StatsScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -263,18 +265,18 @@ class _StatsScreenState extends State<StatsScreen> {
                               Expanded(
                                 child: Text(
                                   item['category'],
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.black,
+                                    color: Theme.of(context).textTheme.bodyLarge?.color,
                                   ),
                                 ),
                               ),
                               Text(
                                 '${item['percentage']}%',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black,
+                                  color: Theme.of(context).textTheme.bodyLarge?.color,
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -301,10 +303,10 @@ class _StatsScreenState extends State<StatsScreen> {
               const SizedBox(height: 20),
               Text(
                 _selectedTab == 0 ? 'Income Breakdown' : 'Expense Breakdown',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
               const SizedBox(height: 10),
@@ -320,6 +322,9 @@ class _StatsScreenState extends State<StatsScreen> {
                         itemCount: currentRecords.length,
                         itemBuilder: (context, index) {
                     final record = currentRecords[index];
+                    final transactionId = "${record['name']}_${record['timestamp']}";
+                    final isRead = _readTransactions.contains(transactionId);
+                    
                     return GestureDetector(
                       onTap: () {
                         showDialog(
@@ -330,11 +335,22 @@ class _StatsScreenState extends State<StatsScreen> {
                               content: record['description'],
                               onAskDebtDude: () {
                                 Navigator.pop(context);
-                                // Ask DebtDude pressed
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ConversationScreen(
+                                      conversationId: 'transaction_${record['timestamp']}',
+                                      title: 'DebtDude Chat',
+                                      initialMessage: 'Tell me about this transaction: ${record['name']} - ${record['description']} for ${context.read<CurrencyCubit>().formatAmount((record['amount'] as num).abs())}',
+                                    ),
+                                  ),
+                                );
                               },
                               onMarkAsRead: () {
                                 Navigator.pop(context);
-                                // Mark as Read pressed
+                                setState(() {
+                                  _readTransactions.add(transactionId);
+                                });
                               },
                             );
                           },
@@ -344,10 +360,10 @@ class _StatsScreenState extends State<StatsScreen> {
                         margin: const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: Colors.grey[200]!,
+                            color: isRead ? Colors.transparent : Theme.of(context).dividerColor,
                             width: 1,
                           ),
                         ),
@@ -372,12 +388,15 @@ class _StatsScreenState extends State<StatsScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                        record['name'],
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
+                                      Expanded(
+                                        child: Text(
+                                          record['name'],
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                                          ),
                                         ),
                                       ),
                                       Text(
@@ -392,6 +411,7 @@ class _StatsScreenState extends State<StatsScreen> {
                                   const SizedBox(height: 4),
                                   Text(
                                     record['description'],
+                                    overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                       fontSize: 13,
                                       color: Colors.grey,
@@ -461,10 +481,10 @@ class _StatsScreenState extends State<StatsScreen> {
               builder: (context, currencyState) {
                 return Text(
                   context.read<CurrencyCubit>().formatAmount(_getTotalAmount(data)),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 );
               },

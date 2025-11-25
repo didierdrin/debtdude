@@ -1,11 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/api_service.dart';
 
 part 'chat_state.dart';
 
 class ChatCubit extends Cubit<ChatState> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final ApiService _apiService = ApiService();
 
   ChatCubit() : super(ChatInitial());
@@ -13,15 +15,29 @@ class ChatCubit extends Cubit<ChatState> {
   Future<void> loadConversations() async {
     try {
       emit(ChatLoading());
-      final response = await _apiService.getConversations();
-      
-      if (response['success'] == true) {
-        emit(ConversationsLoaded(response['data'] ?? []));
-      } else {
-        emit(ConversationsLoaded([]));
+      final user = _auth.currentUser;
+      if (user == null) {
+        emit(ChatError('User not logged in'));
+        return;
       }
+
+      final snapshot = await _firestore
+          .collection('conversations')
+          .doc(user.uid)
+          .collection('chats')
+          .orderBy('lastUpdated', descending: true)
+          .get();
+      
+      final conversations = snapshot.docs.map((doc) => {
+        'id': doc.id,
+        'title': doc.data()['title'] ?? 'Chat',
+        'lastMessage': doc.data()['lastMessage'] ?? '',
+        'lastMessageTime': doc.data()['lastMessageTime'] ?? '',
+      }).toList();
+      
+      emit(ConversationsLoaded(conversations));
     } catch (e) {
-      emit(ChatError(e.toString()));
+      emit(ConversationsLoaded([]));
     }
   }
 
@@ -33,13 +49,23 @@ class ChatCubit extends Cubit<ChatState> {
         return;
       }
 
-      final response = await _apiService.createConversation(title, user.uid);
+      final conversationId = DateTime.now().millisecondsSinceEpoch.toString();
       
-      if (response['success'] == true) {
-        loadConversations();
-      } else {
-        emit(ChatError('Failed to create conversation'));
-      }
+      await _firestore
+          .collection('conversations')
+          .doc(user.uid)
+          .collection('chats')
+          .doc(conversationId)
+          .set({
+        'title': title,
+        'messages': [],
+        'createdAt': FieldValue.serverTimestamp(),
+        'lastUpdated': FieldValue.serverTimestamp(),
+        'lastMessage': '',
+        'lastMessageTime': null,
+      });
+      
+      loadConversations();
     } catch (e) {
       emit(ChatError(e.toString()));
     }
@@ -78,5 +104,26 @@ class ChatCubit extends Cubit<ChatState> {
     final now = DateTime.now();
     final weekStart = now.subtract(Duration(days: now.weekday - 1));
     return date.isAfter(weekStart);
+  }
+
+  Future<void> deleteConversation(String conversationId) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        emit(ChatError('User not logged in'));
+        return;
+      }
+
+      await _firestore
+          .collection('conversations')
+          .doc(user.uid)
+          .collection('chats')
+          .doc(conversationId)
+          .delete();
+      
+      loadConversations();
+    } catch (e) {
+      emit(ChatError(e.toString()));
+    }
   }
 }

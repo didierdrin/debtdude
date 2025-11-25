@@ -22,13 +22,13 @@ class ConversationScreen extends StatefulWidget {
 class _ConversationScreenState extends State<ConversationScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  List<Map<String, dynamic>> _transactions = [];
+  List<Map<String, dynamic>> _currentMessages = [];
 
   void _sendMessage(BuildContext context) {
     if (_messageController.text.trim().isNotEmpty) {
       final message = _messageController.text;
       _messageController.clear();
-      context.read<ConversationCubit>().sendMessage(message, _transactions);
+      context.read<ConversationCubit>().sendMessage(message);
     }
   }
 
@@ -40,20 +40,11 @@ class _ConversationScreenState extends State<ConversationScreen> {
     if (widget.initialMessage != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _messageController.text = widget.initialMessage!;
-        _sendMessage(context);
       });
     }
   }
 
-  void _loadTransactions(BuildContext context) {
-    context.read<SaveFirebaseCubit>().getRecentTransactions().listen((transactions) {
-      if (mounted) {
-        setState(() {
-          _transactions = transactions;
-        });
-      }
-    });
-  }
+
 
   @override
   void dispose() {
@@ -66,14 +57,14 @@ class _ConversationScreenState extends State<ConversationScreen> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => ConversationCubit(widget.conversationId)..loadMessages()),
+        BlocProvider(create: (context) => ConversationCubit(
+          widget.conversationId, 
+          firebaseCubit: context.read<SaveFirebaseCubit>()
+        )..loadMessages()),
         BlocProvider(create: (_) => SaveFirebaseCubit()),
       ],
       child: Builder(
         builder: (context) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _loadTransactions(context);
-          });
           return Scaffold(
             body: SafeArea(
           child: Padding(
@@ -86,17 +77,17 @@ class _ConversationScreenState extends State<ConversationScreen> {
                   children: [
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
-                      child: const Icon(Icons.arrow_back, color: Colors.black),
+                      child: Icon(Icons.arrow_back, color: Theme.of(context).iconTheme.color),
                     ),
                     Expanded(
                       child: Text(
                         widget.title,
                         textAlign: TextAlign.center,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                          color: Theme.of(context).textTheme.titleLarge?.color,
                         ),
                       ),
                     ),
@@ -129,28 +120,30 @@ class _ConversationScreenState extends State<ConversationScreen> {
                         return const Center(child: CircularProgressIndicator());
                       }
                       if (state is MessagesLoaded) {
-                        final messages = state.messages;
-                        if (messages.isEmpty) {
-                          return const Center(
-                            child: Text('Start a conversation with DebtDude!'),
-                          );
-                        }
-                        return ListView.builder(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          itemCount: messages.length,
-                          itemBuilder: (context, index) {
-                            final message = messages[index];
-                            return _buildMessageBubble(
-                              text: message['text'] ?? '',
-                              isMe: message['isMe'] ?? false,
-                              time: message['time'] ?? '',
-                            );
-                          },
+                        _currentMessages = state.messages;
+                      }
+                      
+                      final messages = _currentMessages;
+                      if (messages.isEmpty) {
+                        return Center(
+                          child: Text(
+                            'Start a conversation with DebtDude!',
+                            style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
+                          ),
                         );
                       }
-                      return const Center(
-                        child: Text('Start a conversation with DebtDude!'),
+                      return ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          final message = messages[index];
+                          return _buildMessageBubble(
+                            text: message['text'] ?? '',
+                            isMe: message['isMe'] ?? false,
+                            time: message['time'] ?? '',
+                          );
+                        },
                       );
                     },
                   ),
@@ -162,18 +155,29 @@ class _ConversationScreenState extends State<ConversationScreen> {
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.grey[800] 
+                                : Colors.grey[100],
                             borderRadius: BorderRadius.circular(24.0),
-                            border: Border.all(color: Colors.grey[300]!),
+                            border: Border.all(
+                              color: Theme.of(context).brightness == Brightness.dark 
+                                  ? Colors.grey[600]! 
+                                  : Colors.grey[300]!
+                            ),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16.0),
                             child: TextField(
                               controller: _messageController,
-                              decoration: const InputDecoration(
+                              style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
+                              decoration: InputDecoration(
                                 hintText: 'Type a message...',
                                 border: InputBorder.none,
-                                hintStyle: TextStyle(color: Colors.grey),
+                                hintStyle: TextStyle(
+                                  color: Theme.of(context).brightness == Brightness.dark 
+                                      ? Colors.grey[400] 
+                                      : Colors.grey
+                                ),
                               ),
                               onSubmitted: (_) => _sendMessage(context),
                             ),
@@ -235,7 +239,11 @@ class _ConversationScreenState extends State<ConversationScreen> {
         margin: const EdgeInsets.symmetric(vertical: 4.0),
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
         decoration: BoxDecoration(
-          color: isMe ? const Color(0xFF5573F6) : Colors.grey[100],
+          color: isMe 
+              ? const Color(0xFF5573F6) 
+              : (Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.grey[700] 
+                  : Colors.grey[100]),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16.0),
             topRight: const Radius.circular(16.0),
@@ -248,10 +256,12 @@ class _ConversationScreenState extends State<ConversationScreen> {
           children: [
             Text(
               text,
-              overflow: TextOverflow.ellipsis,
-              maxLines: null,
               style: TextStyle(
-                color: isMe ? Colors.white : Colors.black,
+                color: isMe 
+                    ? Colors.white 
+                    : (Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.white 
+                        : Colors.black),
                 fontSize: 16,
               ),
             ),
@@ -259,7 +269,11 @@ class _ConversationScreenState extends State<ConversationScreen> {
             Text(
               time,
               style: TextStyle(
-                color: isMe ? Colors.white70 : Colors.grey[600],
+                color: isMe 
+                    ? Colors.white70 
+                    : (Theme.of(context).brightness == Brightness.dark 
+                        ? Colors.grey[400] 
+                        : Colors.grey[600]),
                 fontSize: 10,
               ),
             ),

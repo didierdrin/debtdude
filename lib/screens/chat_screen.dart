@@ -65,8 +65,21 @@ class _ChatScreenState extends State<ChatScreen> {
                       children: [
                         IconButton(
                           icon: Icon(Icons.add, color: Theme.of(context).textTheme.titleLarge?.color),
-                          onPressed: () {
-                            context.read<ChatCubit>().createConversation('New Chat');
+                          onPressed: () async {
+                            final conversationId = DateTime.now().millisecondsSinceEpoch.toString();
+                            await context.read<ChatCubit>().createConversation('New Chat');
+                            
+                            if (mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ConversationScreen(
+                                    conversationId: conversationId,
+                                    title: 'New Chat',
+                                  ),
+                                ),
+                              );
+                            }
                           },
                         ),
                         IconButton(
@@ -144,83 +157,103 @@ class _ChatScreenState extends State<ChatScreen> {
                           itemCount: conversations.length,
                           itemBuilder: (context, index) {
                             final conversation = conversations[index];
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ConversationScreen(
-                                      conversationId: conversation['id'],
-                                      title: conversation['title'],
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Container(
+                            return Dismissible(
+                              key: Key(conversation['id']),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
                                 margin: const EdgeInsets.only(bottom: 12),
-                                padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).cardColor,
+                                  color: Colors.red,
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: Colors.grey[200]!,
-                                    width: 1,
-                                  ),
                                 ),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const CircleAvatar(
-                                      radius: 20,
-                                      backgroundColor: Color(0xFF5573F6),
-                                      child: Icon(
-                                        Icons.chat,
-                                        color: Colors.white,
-                                        size: 18,
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.only(right: 16),
+                                child: const Icon(
+                                  Icons.delete,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              onDismissed: (direction) {
+                                context.read<ChatCubit>().deleteConversation(conversation['id']);
+                              },
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ConversationScreen(
+                                        conversationId: conversation['id'],
+                                        title: conversation['title'],
                                       ),
                                     ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Expanded(
-                                                child: Text(
-                                                  conversation['title'] ?? 'Chat',
-                                                  overflow: TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                                  );
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).cardColor,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Colors.grey[200]!,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const CircleAvatar(
+                                        radius: 20,
+                                        backgroundColor: Color(0xFF5573F6),
+                                        child: Icon(
+                                          Icons.chat,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    conversation['title'] ?? 'Chat',
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                              Text(
-                                                _formatTime(conversation['lastMessageTime']),
-                                                style: const TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey,
+                                                Text(
+                                                  _formatTime(conversation['lastMessageTime']),
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey,
+                                                  ),
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            conversation['lastMessage'] ?? '',
-                                            style: const TextStyle(
-                                              fontSize: 13,
-                                              color: Colors.grey,
+                                              ],
                                             ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              conversation['lastMessage'] ?? '',
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.grey,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
@@ -262,18 +295,22 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _handleQuickPrompt(String prompt) {
-    context.read<ChatCubit>().createConversation(prompt);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ConversationScreen(
-          conversationId: DateTime.now().millisecondsSinceEpoch.toString(),
-          title: 'Quick Chat',
-          initialMessage: prompt,
+  void _handleQuickPrompt(String prompt) async {
+    final conversationId = DateTime.now().millisecondsSinceEpoch.toString();
+    await context.read<ChatCubit>().createConversation('Quick Chat');
+    
+    if (mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ConversationScreen(
+            conversationId: conversationId,
+            title: 'Quick Chat',
+            initialMessage: prompt,
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   String _formatTime(String? timestamp) {

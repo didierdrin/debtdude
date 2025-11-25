@@ -6,11 +6,13 @@ import '../cubits/save_firebase_cubit.dart';
 class ConversationScreen extends StatefulWidget {
   final String conversationId;
   final String title;
+  final String? initialMessage;
   
   const ConversationScreen({
     super.key,
     required this.conversationId,
     required this.title,
+    this.initialMessage,
   });
 
   @override
@@ -22,7 +24,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
   final ScrollController _scrollController = ScrollController();
   List<Map<String, dynamic>> _transactions = [];
 
-  void _sendMessage() {
+  void _sendMessage(BuildContext context) {
     if (_messageController.text.trim().isNotEmpty) {
       final message = _messageController.text;
       _messageController.clear();
@@ -35,14 +37,21 @@ class _ConversationScreenState extends State<ConversationScreen> {
   @override
   void initState() {
     super.initState();
-    _loadTransactions();
+    if (widget.initialMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _messageController.text = widget.initialMessage!;
+        _sendMessage(context);
+      });
+    }
   }
 
-  void _loadTransactions() {
+  void _loadTransactions(BuildContext context) {
     context.read<SaveFirebaseCubit>().getRecentTransactions().listen((transactions) {
-      setState(() {
-        _transactions = transactions;
-      });
+      if (mounted) {
+        setState(() {
+          _transactions = transactions;
+        });
+      }
     });
   }
 
@@ -60,8 +69,13 @@ class _ConversationScreenState extends State<ConversationScreen> {
         BlocProvider(create: (_) => ConversationCubit(widget.conversationId)..loadMessages()),
         BlocProvider(create: (_) => SaveFirebaseCubit()),
       ],
-      child: Scaffold(
-        body: SafeArea(
+      child: Builder(
+        builder: (context) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _loadTransactions(context);
+          });
+          return Scaffold(
+            body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: Column(
@@ -89,7 +103,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                 Expanded(
                   child: BlocConsumer<ConversationCubit, ConversationState>(
                     listener: (context, state) {
-                      if (state is MessageSent) {
+                      if (state is MessageSent || state is MessagesLoaded) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           if (_scrollController.hasClients) {
                             _scrollController.animateTo(
@@ -100,6 +114,11 @@ class _ConversationScreenState extends State<ConversationScreen> {
                           }
                         });
                       }
+                      if (state is ConversationError) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(state.message)),
+                        );
+                      }
                     },
                     builder: (context, state) {
                       if (state is ConversationLoading) {
@@ -107,6 +126,11 @@ class _ConversationScreenState extends State<ConversationScreen> {
                       }
                       if (state is MessagesLoaded) {
                         final messages = state.messages;
+                        if (messages.isEmpty) {
+                          return const Center(
+                            child: Text('Start a conversation with DebtDude!'),
+                          );
+                        }
                         return ListView.builder(
                           controller: _scrollController,
                           padding: const EdgeInsets.only(bottom: 8.0),
@@ -114,9 +138,9 @@ class _ConversationScreenState extends State<ConversationScreen> {
                           itemBuilder: (context, index) {
                             final message = messages[index];
                             return _buildMessageBubble(
-                              text: message['text'],
-                              isMe: message['isMe'],
-                              time: message['time'],
+                              text: message['text'] ?? '',
+                              isMe: message['isMe'] ?? false,
+                              time: message['time'] ?? '',
                             );
                           },
                         );
@@ -147,7 +171,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                                 border: InputBorder.none,
                                 hintStyle: TextStyle(color: Colors.grey),
                               ),
-                              onSubmitted: (_) => _sendMessage(),
+                              onSubmitted: (_) => _sendMessage(context),
                             ),
                           ),
                         ),
@@ -156,7 +180,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
                       BlocBuilder<ConversationCubit, ConversationState>(
                         builder: (context, state) {
                           return GestureDetector(
-                            onTap: state is MessageSending ? null : _sendMessage,
+                            onTap: state is MessageSending ? null : () => _sendMessage(context),
                             child: Container(
                               width: 48,
                               height: 48,
@@ -190,7 +214,8 @@ class _ConversationScreenState extends State<ConversationScreen> {
               ],
             ),
           ),
-        ),
+          ), );
+        },
       ),
     );
   }

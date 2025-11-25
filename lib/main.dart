@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'firebase_options.dart';
 import 'package:debtdude/screens/signup_signin_screen.dart';
 import 'package:debtdude/cubits/chat_cubit.dart';
+import 'package:debtdude/cubits/save_firebase_cubit.dart';
 
 
 void main() async {
@@ -21,8 +22,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ChatCubit(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => ChatCubit()),
+        BlocProvider(create: (context) => SaveFirebaseCubit()),
+      ],
       child: MaterialApp(
         title: 'DebtDude',
         debugShowCheckedModeBanner: false,

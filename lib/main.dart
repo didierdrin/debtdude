@@ -5,6 +5,7 @@ import 'firebase_options.dart';
 import 'package:debtdude/screens/signup_signin_screen.dart';
 import 'package:debtdude/cubits/chat_cubit.dart';
 import 'package:debtdude/cubits/theme_cubit.dart';
+import 'package:debtdude/cubits/currency_cubit.dart';
 import 'package:debtdude/theme/app_theme.dart';
 
 
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => ChatCubit()),
         BlocProvider(create: (context) => ThemeCubit()),
+        BlocProvider(create: (context) => CurrencyCubit()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, themeState) {

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:debtdude/cubits/theme_cubit.dart';
+import 'package:debtdude/cubits/currency_cubit.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,7 +16,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _notificationsEnabled = true;
   bool _smsAnalysisEnabled = true;
-  String _selectedCurrency = 'RWF';
 
   @override
   Widget build(BuildContext context) {
@@ -249,16 +249,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const Divider(height: 1),
            
                     // Currency Selection
-                    ListTile(
-                      leading: const Icon(
-                        Icons.attach_money,
-                        color: Color(0xFF5573F6),
-                      ),
-                      title: const Text('Currency'),
-                      subtitle: Text('Current: $_selectedCurrency'),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                      onTap: () {
-                        _showCurrencyDialog();
+                    BlocBuilder<CurrencyCubit, CurrencyState>(
+                      builder: (context, currencyState) {
+                        return ListTile(
+                          leading: const Icon(
+                            Icons.attach_money,
+                            color: Color(0xFF5573F6),
+                          ),
+                          title: const Text('Currency'),
+                          subtitle: Text('Current: ${currencyState.currency}'),
+                          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                          onTap: () {
+                            _showCurrencyDialog();
+                          },
+                        );
                       },
                     ),
                   ],
@@ -357,39 +361,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Select Currency'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: const Text('Rwandan Franc (RWF)'),
-                leading: Icon(
-                  _selectedCurrency == 'RWF' ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                  color: const Color(0xFF5573F6),
-                ),
-                onTap: () {
-                  setState(() {
-                    _selectedCurrency = 'RWF';
-                  });
-                  Navigator.pop(context);
-                },
+        return BlocBuilder<CurrencyCubit, CurrencyState>(
+          builder: (context, currencyState) {
+            return AlertDialog(
+              title: const Text('Select Currency'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    title: const Text('Rwandan Franc (RWF)'),
+                    leading: Icon(
+                      currencyState.currency == 'RWF' ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                      color: const Color(0xFF5573F6),
+                    ),
+                    onTap: () {
+                      context.read<CurrencyCubit>().changeCurrency('RWF');
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('US Dollar (USD)'),
+                    leading: Icon(
+                      currencyState.currency == 'USD' ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                      color: const Color(0xFF5573F6),
+                    ),
+                    onTap: () {
+                      context.read<CurrencyCubit>().changeCurrency('USD');
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
               ),
-              ListTile(
-                title: const Text('US Dollar (USD)'),
-                leading: Icon(
-                  _selectedCurrency == 'USD' ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                  color: const Color(0xFF5573F6),
-                ),
-                onTap: () {
-                  setState(() {
-                    _selectedCurrency = 'USD';
-                  });
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );

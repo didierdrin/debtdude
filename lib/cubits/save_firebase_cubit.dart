@@ -23,7 +23,7 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
     try {
       // Check if SMS is from relevant services
       final lowerBody = body.toLowerCase();
-      final isMMoney = lowerBody.contains('m-money') || address.contains('MMoney');
+      final isMMoney = lowerBody.contains('m-money') || address.contains('M-Money');
       final isMokash = lowerBody.contains('mokash') || address.contains('Mokash');
       final isAirtelMoney = lowerBody.contains('airtelmoney') || address.contains('AirtelMoney') || lowerBody.contains('*151*') || lowerBody.contains('*165*');
 

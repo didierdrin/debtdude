@@ -80,78 +80,42 @@ class _ChatScreenState extends State<ChatScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                BlocBuilder<ChatCubit, ChatState>(
-                  builder: (context, state) {
-                    if (state is DashboardDataLoaded) {
-                      final data = state.dashboardData;
-                      return Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF5573F6),
-                          borderRadius: BorderRadius.circular(8),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF5573F6),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Quick Questions',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 40,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
                           children: [
-                            const Text(
-                              'Total Balance:',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              '${data['totalBalance']} RWF',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'This week\'s spending: ${data['weeklySpending']} RWF',
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 13,
-                              ),
-                            ),
+                            _buildQuickPrompt('Tell me my last 3 transactions'),
+                            const SizedBox(width: 8),
+                            _buildQuickPrompt('Who sent me the most money this week?'),
+                            const SizedBox(width: 8),
+                            _buildQuickPrompt('What\'s my spending pattern?'),
+                            const SizedBox(width: 8),
+                            _buildQuickPrompt('Show my balance summary'),
                           ],
                         ),
-                      );
-                    }
-                    return Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF5573F6),
-                        borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Total Balance:',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
-                            ),
-                          ),
-                          SizedBox(height: 6),
-                          Text(
-                            'Loading...',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 20),
                 const Text(
@@ -223,12 +187,15 @@ class _ChatScreenState extends State<ChatScreen> {
                                           Row(
                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                             children: [
-                                              Text(
-                                                conversation['title'] ?? 'Chat',
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black,
+                                              Expanded(
+                                                child: Text(
+                                                  conversation['title'] ?? 'Chat',
+                                                  overflow: TextOverflow.ellipsis,
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black,
+                                                  ),
                                                 ),
                                               ),
                                               Text(
@@ -269,6 +236,41 @@ class _ChatScreenState extends State<ChatScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickPrompt(String text) {
+    return GestureDetector(
+      onTap: () => _handleQuickPrompt(text),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.3)),
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleQuickPrompt(String prompt) {
+    context.read<ChatCubit>().createConversation(prompt);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ConversationScreen(
+          conversationId: DateTime.now().millisecondsSinceEpoch.toString(),
+          title: 'Quick Chat',
+          initialMessage: prompt,
         ),
       ),
     );

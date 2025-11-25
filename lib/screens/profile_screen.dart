@@ -291,7 +291,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       title: const Text('Privacy & Security'),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {
-                        // Navigate to privacy settings
+                        _showPrivacyDialog();
                       },
                     ),
                     const Divider(height: 1),
@@ -390,6 +390,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  void _showPrivacyDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Privacy & Security'),
+          content: const SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '🔒 Data Protection',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                ),
+                SizedBox(height: 8),
+                Text('• SMS data is processed locally on your device'),
+                Text('• Only financial transaction SMS are analyzed'),
+                Text('• Your data is encrypted and stored securely in Firebase'),
+                SizedBox(height: 16),
+                Text(
+                  '📱 SMS Permissions',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                ),
+                SizedBox(height: 8),
+                Text('• SMS access is used only for transaction parsing'),
+                Text('• No SMS content is stored permanently'),
+                Text('• You can revoke SMS permissions anytime'),
+                SizedBox(height: 16),
+                Text(
+                  '🔐 Authentication',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                ),
+                SizedBox(height: 8),
+                Text('• Secure Firebase Authentication'),
+                Text('• Email/password encryption'),
+                Text('• Session management and auto-logout'),
+                SizedBox(height: 16),
+                Text(
+                  '💾 Data Storage',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                ),
+                SizedBox(height: 8),
+                Text('• Transaction data stored in secure Firebase Cloud'),
+                Text('• No third-party data sharing'),
+                Text('• You can delete your data anytime'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
         );
       },
     );

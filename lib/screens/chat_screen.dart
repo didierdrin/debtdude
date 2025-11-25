@@ -53,12 +53,12 @@ class _ChatScreenState extends State<ChatScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Chat',
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     Row(
@@ -118,7 +118,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
+                Text(
                   'Recent Chat',
                   style: TextStyle(
                     fontSize: 16,
@@ -191,7 +191,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                                 child: Text(
                                                   conversation['title'] ?? 'Chat',
                                                   overflow: TextOverflow.ellipsis,
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.bold,
                                                     color: Theme.of(context).textTheme.bodyMedium?.color,

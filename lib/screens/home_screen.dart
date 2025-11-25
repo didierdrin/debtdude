@@ -10,6 +10,7 @@ import 'profile_screen.dart';
 import 'conversation_screen.dart';
 import 'package:debtdude/widgets/dialog_box.dart';
 import 'package:debtdude/widgets/theme_toggle.dart';
+import 'package:debtdude/services/read_transactions_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -102,7 +103,20 @@ class _HomeContentBody extends StatefulWidget {
 }
 
 class _HomeContentBodyState extends State<_HomeContentBody> {
-  final Set<String> _readTransactions = {};
+  Set<String> _readTransactions = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReadTransactions();
+  }
+
+  Future<void> _loadReadTransactions() async {
+    final readTransactions = await ReadTransactionsService.getReadTransactions();
+    setState(() {
+      _readTransactions = readTransactions;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -347,8 +361,9 @@ class _HomeContentBodyState extends State<_HomeContentBody> {
                                                   ),
                                                 );
                                               },
-                                              onMarkAsRead: () {
+                                              onMarkAsRead: () async {
                                                 Navigator.pop(context);
+                                                await ReadTransactionsService.markAsRead(transactionId);
                                                 setState(() {
                                                   _readTransactions.add(transactionId);
                                                 });

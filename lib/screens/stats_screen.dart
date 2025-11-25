@@ -5,6 +5,7 @@ import 'package:debtdude/widgets/dialog_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:debtdude/cubits/save_firebase_cubit.dart';
 import 'package:debtdude/cubits/currency_cubit.dart';
+import 'package:debtdude/services/read_transactions_service.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -15,7 +16,20 @@ class StatsScreen extends StatefulWidget {
 
 class _StatsScreenState extends State<StatsScreen> {
   int _selectedTab = 0; // 0 for Income, 1 for Outcome
-  final Set<String> _readTransactions = {};
+  Set<String> _readTransactions = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReadTransactions();
+  }
+
+  Future<void> _loadReadTransactions() async {
+    final readTransactions = await ReadTransactionsService.getReadTransactions();
+    setState(() {
+      _readTransactions = readTransactions;
+    });
+  }
 
   List<Map<String, dynamic>> _calculateCategoryData(List<Map<String, dynamic>> transactions, bool isIncome) {
     final categoryTotals = <String, int>{};
@@ -346,8 +360,9 @@ class _StatsScreenState extends State<StatsScreen> {
                                   ),
                                 );
                               },
-                              onMarkAsRead: () {
+                              onMarkAsRead: () async {
                                 Navigator.pop(context);
+                                await ReadTransactionsService.markAsRead(transactionId);
                                 setState(() {
                                   _readTransactions.add(transactionId);
                                 });

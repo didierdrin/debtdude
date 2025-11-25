@@ -1,4 +1,3 @@
-import 'package:debtdude/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,7 +9,6 @@ import 'package:debtdude/cubits/currency_cubit.dart';
 import 'package:debtdude/cubits/sms_analysis_cubit.dart';
 import 'package:debtdude/cubits/save_firebase_cubit.dart';
 import 'package:debtdude/cubits/notification_cubit.dart';
-import 'package:debtdude/services/notification_service.dart';
 import 'package:debtdude/theme/app_theme.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
@@ -24,11 +22,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  try {
-    await ApiService.initializeApiKey();
-  } catch (e) {
-    print('API Service initialization error: $e');
-  }
+
 
   try {
     await Firebase.initializeApp(

@@ -43,7 +43,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return BlocProvider.value(
       value: _saveFirebaseCubit,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -64,13 +64,13 @@ class _ChatScreenState extends State<ChatScreen> {
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.add, color: Colors.black),
+                          icon: Icon(Icons.add, color: Theme.of(context).textTheme.titleLarge?.color),
                           onPressed: () {
                             context.read<ChatCubit>().createConversation('New Chat');
                           },
                         ),
                         IconButton(
-                          icon: const Icon(Icons.notifications_none_outlined, color: Colors.black),
+                          icon: Icon(Icons.notifications_none_outlined, color: Theme.of(context).textTheme.titleLarge?.color),
                           onPressed: () {
                             Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())); 
                           },
@@ -123,7 +123,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: Theme.of(context).textTheme.titleMedium?.color,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -160,7 +160,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 margin: const EdgeInsets.only(bottom: 12),
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: Theme.of(context).cardColor,
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
                                     color: Colors.grey[200]!,
@@ -194,7 +194,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                                   style: const TextStyle(
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.bold,
-                                                    color: Colors.black,
+                                                    color: Theme.of(context).textTheme.bodyMedium?.color,
                                                   ),
                                                 ),
                                               ),

@@ -100,7 +100,7 @@ class _StatsScreenState extends State<StatsScreen> {
   Widget _buildStatsScreen(BuildContext context, List<Map<String, dynamic>> currentRecords, List<Map<String, dynamic>> currentData, double totalAmount) {
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),

@@ -36,13 +36,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: Theme.of(context).textTheme.titleLarge?.color,
                       ),
                     ),
                     IconButton(
                       icon: const Icon(
                         Icons.notifications_none_outlined,
-                        color: Colors.black,
+                        color: Theme.of(context).textTheme.titleLarge?.color,
                       ),
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
@@ -54,7 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -114,7 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // Settings Section
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -270,7 +270,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // Menu Options
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -322,7 +322,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(

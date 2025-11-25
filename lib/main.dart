@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'firebase_options.dart';
 import 'package:debtdude/screens/signup_signin_screen.dart';
 import 'package:debtdude/cubits/chat_cubit.dart';
+import 'package:debtdude/cubits/theme_cubit.dart';
+import 'package:debtdude/theme/app_theme.dart';
 
 
 void main() async {
@@ -21,15 +23,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ChatCubit(),
-      child: MaterialApp(
-        title: 'DebtDude',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF5573F6)),
-        ),
-        home: const AuthScreen(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => ChatCubit()),
+        BlocProvider(create: (context) => ThemeCubit()),
+      ],
+      child: BlocBuilder<ThemeCubit, ThemeState>(
+        builder: (context, themeState) {
+          return MaterialApp(
+            title: 'DebtDude',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeState.themeMode,
+            home: const AuthScreen(),
+          );
+        },
       ),
     );
   }

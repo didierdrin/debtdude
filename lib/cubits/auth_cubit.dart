@@ -121,8 +121,16 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> signUp(String email, String password, String confirmPassword) async {
+    if (email.trim().isEmpty) {
+      emit(AuthError('Please enter your email address'));
+      return;
+    }
+    if (password.isEmpty) {
+      emit(AuthError('Please enter a password'));
+      return;
+    }
     if (password != confirmPassword) {
-      emit(AuthError('Passwords do not match'));
+      emit(AuthError('Passwords do not match. Please try again'));
       return;
     }
     
@@ -133,18 +141,41 @@ class AuthCubit extends Cubit<AuthState> {
         password: password
       );
       if (result.user != null) {
-        emit(AuthSuccess('Sign up successful'));
+        emit(AuthSuccess('Welcome! Your account has been created successfully'));
       } else {
-        emit(AuthError('Sign up failed'));
+        emit(AuthError('We encountered an issue creating your account. Please try again'));
       }
     } on FirebaseAuthException catch (e) {
-      emit(AuthError(e.message ?? 'Sign up failed'));
+      String errorMessage;
+      switch (e.code) {
+        case 'weak-password':
+          errorMessage = 'Please choose a stronger password with at least 6 characters';
+          break;
+        case 'email-already-in-use':
+          errorMessage = 'This email is already registered. Please sign in or use a different email';
+          break;
+        case 'invalid-email':
+          errorMessage = 'Please enter a valid email address';
+          break;
+        default:
+          errorMessage = 'We encountered an issue creating your account. Please try again';
+      }
+      emit(AuthError(errorMessage));
     } catch (e) {
-      emit(AuthError('An unexpected error occurred'));
+      emit(AuthError('Something went wrong. Please check your connection and try again'));
     }
   }
 
   Future<void> signIn(String email, String password) async {
+    if (email.trim().isEmpty) {
+      emit(AuthError('Please enter your email address'));
+      return;
+    }
+    if (password.isEmpty) {
+      emit(AuthError('Please enter your password'));
+      return;
+    }
+    
     emit(AuthLoading());
     try {
       final UserCredential result = await _auth.signInWithEmailAndPassword(
@@ -152,14 +183,34 @@ class AuthCubit extends Cubit<AuthState> {
         password: password
       );
       if (result.user != null) {
-        emit(AuthSuccess('Sign in successful'));
+        emit(AuthSuccess('Welcome back! You have signed in successfully'));
       } else {
-        emit(AuthError('Sign in failed'));
+        emit(AuthError('We encountered an issue signing you in. Please try again'));
       }
     } on FirebaseAuthException catch (e) {
-      emit(AuthError(e.message ?? 'Sign in failed'));
+      String errorMessage;
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = 'No account found with this email. Please check your email or sign up';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Incorrect password. Please try again';
+          break;
+        case 'invalid-email':
+          errorMessage = 'Please enter a valid email address';
+          break;
+        case 'user-disabled':
+          errorMessage = 'This account has been temporarily disabled. Please contact support';
+          break;
+        case 'too-many-requests':
+          errorMessage = 'Too many failed attempts. Please wait a moment and try again';
+          break;
+        default:
+          errorMessage = 'We encountered an issue signing you in. Please try again';
+      }
+      emit(AuthError(errorMessage));
     } catch (e) {
-      emit(AuthError('An unexpected error occurred'));
+      emit(AuthError('Something went wrong. Please check your connection and try again'));
     }
   }
 }

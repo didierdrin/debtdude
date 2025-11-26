@@ -45,6 +45,13 @@ flutter run
 - **Target Platforms**: Android & iOS
 - **SMS Analysis**: Mobile Money transaction parsing
 
+## Target Audience
+
+- Mobile money users in Rwanda (MTN MoMo & Airtel Money)
+- Smartphone users seeking financial management tools
+- Individuals who frequently lend/borrow money with friends
+- Small business owners tracking daily transactions
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

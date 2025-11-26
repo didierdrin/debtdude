@@ -1,6 +1,6 @@
-# debtdude
+# DebtDude 💰
 
-A new Flutter project.
+AI-powered personal finance management mobile application for Rwanda.
 
 ## Getting Started
 

@@ -398,7 +398,7 @@ Future<void> readAndSaveSmsToFirebase() async {
         });
   }
 
-  // Get most recent balance from SMS transactions
+  // Get most recent balance from SMS transactions (sum of AirtelMoney and M-Money)
   Stream<int?> getMostRecentBalance() {
     final user = _auth.currentUser;
     if (user == null) {
@@ -414,11 +414,29 @@ Future<void> readAndSaveSmsToFirebase() async {
           final data = snapshot.data() as Map<String, dynamic>;
           final transactions = data['transactions'] as List<dynamic>? ?? [];
           
-          // Find the most recent transaction with a balance
+          int? airtelBalance;
+          int? mmoneyBalance;
+          
+          // Find the most recent balance for each service
           for (final tx in transactions.cast<Map<String, dynamic>>()) {
             if (tx['balance'] != null) {
-              return tx['balance'] as int;
+              final service = tx['service'] as String?;
+              if (service == 'AirtelMoney' && airtelBalance == null) {
+                airtelBalance = tx['balance'] as int;
+              } else if (service == 'M-Money' && mmoneyBalance == null) {
+                mmoneyBalance = tx['balance'] as int;
+              }
+              
+              // Break if we have both balances
+              if (airtelBalance != null && mmoneyBalance != null) {
+                break;
+              }
             }
+          }
+          
+          // Return sum of available balances
+          if (airtelBalance != null || mmoneyBalance != null) {
+            return (airtelBalance ?? 0) + (mmoneyBalance ?? 0);
           }
           return null;
         });

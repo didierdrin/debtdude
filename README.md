@@ -2,6 +2,17 @@
 
 AI-powered personal finance management mobile application for Rwanda.
 
+## Overview
+
+DebtDude helps Rwandans manage their mobile money transactions by automatically analyzing SMS messages from MTN MoMo and Airtel Money services.
+
+## Features
+
+- AI-powered SMS transaction analysis
+- Debt tracking with friends and family
+- Automated spending categorization
+- Budget insights and recommendations
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

@@ -58,9 +58,9 @@ DebtDude is an innovative financial management application that leverages SMS me
 - **Pattern Matching**: RegExp for transaction parsing
 - **Real-time Processing**: SMS broadcast receivers
 
-## Project Structure
+## Project's File Structure
 
-```
+
 lib/
 ├── cubits/                 # State management
 │   ├── auth_cubit.dart
@@ -78,7 +78,7 @@ lib/
 │   └── api_service.dart
 ├── widgets/                # Reusable components
 └── main.dart              # App entry point
-```
+
 
 ## Installation & Setup
 

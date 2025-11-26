@@ -56,6 +56,15 @@ flutter run
 - Individuals who frequently lend/borrow money with friends
 - Small business owners tracking daily transactions
 
+## Project Roadmap
+
+- [x] Project setup and team formation
+- [x] UI/UX design and prototyping
+- [ ] Authentication system implementation
+- [ ] SMS parsing and AI integration
+- [ ] Debt tracking features
+- [ ] Testing and deployment
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

@@ -33,6 +33,18 @@ git clone https://github.com/CletusAAbugre/debtdude.git
 flutter pub get
 ```
 
+3. Run the app
+```bash
+flutter run
+```
+
+## Technology Stack
+
+- **Frontend**: Flutter
+- **AI Integration**: Gemini AI
+- **Target Platforms**: Android & iOS
+- **SMS Analysis**: Mobile Money transaction parsing
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

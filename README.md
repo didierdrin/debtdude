@@ -13,6 +13,18 @@ DebtDude helps Rwandans manage their mobile money transactions by automatically 
 - Automated spending categorization
 - Budget insights and recommendations
 
+## Installation
+
+1. Clone the repository
+```bash
+git clone https://github.com/CletusAAbugre/debtdude.git
+```
+
+2. Install dependencies
+```bash
+flutter pub get
+```
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

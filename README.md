@@ -2,6 +2,10 @@
 
 AI-powered personal finance management mobile application for Rwanda.
 
+![Project Status](https://img.shields.io/badge/Status-In%20Development-yellow)
+![Flutter](https://img.shields.io/badge/Flutter-3.8+-blue)
+![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-green)
+
 ## Overview
 
 DebtDude helps Rwandans manage their mobile money transactions by automatically analyzing SMS messages from MTN MoMo and Airtel Money services.

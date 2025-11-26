@@ -94,3 +94,14 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - Project Repository: [https://github.com/CletusAAbugre/debtdude](https://github.com/CletusAAbugre/debtdude)
 - Team Lead: Nsengiyumva Didier
+
+## Acknowledgments
+
+- Rwanda's mobile money ecosystem (MTN MoMo & Airtel Money)
+- Flutter development community
+- AI/ML integration with Gemini
+- University project supervisors
+
+---
+
+**DebtDude** - Empowering Rwandans with smart financial management 🇷🇼

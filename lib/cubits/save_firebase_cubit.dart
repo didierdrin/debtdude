@@ -56,7 +56,7 @@ class SaveFirebaseCubit extends Cubit<SaveFirebaseState> {
   Map<String, dynamic>? _parseMMoney(String body, int date) {
     try {
       // Extract balance from M-Money SMS (Balance: amount RWF)
-      final balanceRegex = RegExp(r'Balance: (\d+(?:,\d+)*) RWF');
+      final balanceRegex = RegExp(r'Balance:(\d+(?:,\d+)*) RWF');
       final balanceMatch = balanceRegex.firstMatch(body);
       int? balance;
       if (balanceMatch != null) {
@@ -398,7 +398,7 @@ Future<void> readAndSaveSmsToFirebase() async {
         });
   }
 
-  // Get most recent balance from SMS transactions (sum of AirtelMoney and M-Money)
+  // Get combined balance from AirtelMoney and M-Money
   Stream<int?> getMostRecentBalance() {
     final user = _auth.currentUser;
     if (user == null) {
@@ -414,31 +414,23 @@ Future<void> readAndSaveSmsToFirebase() async {
           final data = snapshot.data() as Map<String, dynamic>;
           final transactions = data['transactions'] as List<dynamic>? ?? [];
           
+          int? mMoneyBalance;
           int? airtelBalance;
-          int? mmoneyBalance;
           
-          // Find the most recent balance for each service
+          // Find most recent balance for each service
           for (final tx in transactions.cast<Map<String, dynamic>>()) {
             if (tx['balance'] != null) {
-              final service = tx['service'] as String?;
-              if (service == 'AirtelMoney' && airtelBalance == null) {
+              if (tx['service'] == 'M-Money' && mMoneyBalance == null) {
+                mMoneyBalance = tx['balance'] as int;
+              } else if (tx['service'] == 'AirtelMoney' && airtelBalance == null) {
                 airtelBalance = tx['balance'] as int;
-              } else if (service == 'M-Money' && mmoneyBalance == null) {
-                mmoneyBalance = tx['balance'] as int;
-              }
-              
-              // Break if we have both balances
-              if (airtelBalance != null && mmoneyBalance != null) {
-                break;
               }
             }
           }
           
-          // Return sum of available balances
-          if (airtelBalance != null || mmoneyBalance != null) {
-            return (airtelBalance ?? 0) + (mmoneyBalance ?? 0);
-          }
-          return null;
+          // Return combined balance
+          final total = (mMoneyBalance ?? 0) + (airtelBalance ?? 0);
+          return total > 0 ? total : null;
         });
   }
 

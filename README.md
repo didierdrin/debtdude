@@ -13,6 +13,14 @@ DebtDude helps Rwandans manage their mobile money transactions by automatically 
 - Automated spending categorization
 - Budget insights and recommendations
 
+## Team Members
+
+- Blandine Iradukunda - Vice Leader
+- Nsengiyumva Didier - Team Leader  
+- Kumi Konda Yunis - Meetings Organiser
+- Munezero Audrey - Secretary
+- Cletus Ayeebo Abugre - Operator
+
 ## Installation
 
 1. Clone the repository

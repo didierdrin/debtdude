@@ -86,10 +86,10 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   void _emitLocalDashboardData(List<Map<String, dynamic>> transactions) {
-    final totalBalance = transactions.fold<int>(0, (sum, t) => sum + (t['amount'] as num).toInt());
+    final totalBalance = transactions.fold<int>(0, (total, t) => total + (t['amount'] as num).toInt());
     final weeklySpending = transactions
         .where((t) => (t['amount'] as num) < 0 && _isThisWeek(t['timestamp'] as int))
-        .fold<int>(0, (sum, t) => sum + (t['amount'] as num).abs().toInt());
+        .fold<int>(0, (total, t) => total + (t['amount'] as num).abs().toInt());
 
     emit(DashboardDataLoaded({
       'totalBalance': totalBalance,

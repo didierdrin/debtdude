@@ -14,7 +14,6 @@ class NotificationCubit extends Cubit<NotificationState> {
       final isEnabled = await _notificationService.isNotificationEnabled();
       emit(NotificationState(isEnabled: isEnabled));
     } catch (e) {
-      print('Error initializing notification cubit: $e');
       emit(NotificationState(isEnabled: false));
     }
   }
@@ -25,7 +24,6 @@ class NotificationCubit extends Cubit<NotificationState> {
       await _notificationService.setNotificationEnabled(newState);
       emit(NotificationState(isEnabled: newState));
     } catch (e) {
-      print('Error toggling notification: $e');
       // Keep the current state if there's an error
     }
   }

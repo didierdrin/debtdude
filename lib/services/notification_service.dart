@@ -27,19 +27,17 @@ class NotificationService {
       // Setup message handlers
       _setupMessageHandlers();
     } catch (e) {
-      print('Error initializing notifications: $e');
+      // Error initializing notifications
     }
   }
 
   Future<void> _requestPermission() async {
-    NotificationSettings settings = await _firebaseMessaging.requestPermission(
+    await _firebaseMessaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
       provisional: false,
     );
-    
-    print('Permission granted: ${settings.authorizationStatus}');
   }
 
   Future<void> _initializeLocalNotifications() async {
@@ -54,14 +52,14 @@ class NotificationService {
       await _localNotifications.initialize(
         initializationSettings,
         onDidReceiveNotificationResponse: (NotificationResponse response) {
-          print('Notification tapped: ${response.payload}');
+          // Notification tapped
         },
       );
       
       // Create notification channel for Android
       await _createNotificationChannel();
     } catch (e) {
-      print('Error initializing local notifications: $e');
+      // Error initializing local notifications
     }
   }
 
@@ -84,10 +82,9 @@ class NotificationService {
   Future<String?> _getFCMToken() async {
     try {
       String? token = await _firebaseMessaging.getToken();
-      print('FCM Token: $token');
       return token;
     } catch (e) {
-      print('Error getting FCM token: $e');
+      // Error getting FCM token
       return null;
     }
   }
@@ -100,7 +97,7 @@ class NotificationService {
 
     // Handle background message taps
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('Message clicked: ${message.data}');
+      // Message clicked
     });
   }
 
@@ -144,7 +141,7 @@ class NotificationService {
         await _sendStoppingNotification();
       }
     } catch (e) {
-      print('Error setting notification enabled: $e');
+      // Error setting notification enabled
     }
   }
 
@@ -183,7 +180,7 @@ class NotificationService {
         NotificationDetails(android: androidPlatformChannelSpecifics);
 
     await _localNotifications.show(
-      (campaignId + '_stop').hashCode,
+      '${campaignId}_stop'.hashCode,
       'Notifications Disabled',
       'DebtDude notifications have been turned off.',
       platformChannelSpecifics,

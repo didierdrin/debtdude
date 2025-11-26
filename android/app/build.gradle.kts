@@ -24,7 +24,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.debtdude"
-        minSdk = 23 ///flutter.minSdkVersion
+        minSdk = flutter.minSdkVersion ///flutter.minSdkVersion
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"

@@ -240,7 +240,7 @@ class _HomeContentBodyState extends State<_HomeContentBody> {
                                         return BlocBuilder<CurrencyCubit, CurrencyState>(
                                           builder: (context, currencyState) {
                                             return Text(
-                                              "${context.read<CurrencyCubit>().formatAmount(snapshot.data!)}",
+                                              context.read<CurrencyCubit>().formatAmount(snapshot.data!),
                                               style: TextStyle(
                                                 color: Theme.of(context).textTheme.bodyLarge?.color,
                                                 fontSize: 28,

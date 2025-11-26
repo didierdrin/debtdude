@@ -67,11 +67,13 @@ class _ChatScreenState extends State<ChatScreen> {
                           icon: Icon(Icons.add, color: Theme.of(context).textTheme.titleLarge?.color),
                           onPressed: () async {
                             final conversationId = DateTime.now().millisecondsSinceEpoch.toString();
+                            if (!mounted) return;
+                            
+                            final navigator = Navigator.of(context);
                             await context.read<ChatCubit>().createConversation('New Chat');
                             
                             if (mounted) {
-                              Navigator.push(
-                                context,
+                              navigator.push(
                                 MaterialPageRoute(
                                   builder: (context) => ConversationScreen(
                                     conversationId: conversationId,
@@ -297,6 +299,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _handleQuickPrompt(String prompt) async {
     final conversationId = DateTime.now().millisecondsSinceEpoch.toString();
+    if (!mounted) return;
+    
     await context.read<ChatCubit>().createConversation('Quick Chat');
     
     if (mounted) {

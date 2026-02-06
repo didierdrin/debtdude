@@ -1,0 +1,39 @@
+name: Build iOS for Appetize.io
+on:
+  workflow_dispatch:  # Allows manual trigger
+  push:
+    branches: [ main ]
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        
+    - name: Install CocoaPods
+      run: |
+        cd ios
+        pod install
+        
+    - name: Build for iOS Simulator
+      run: |
+        flutter build ios --debug --simulator
+        cd ios
+        xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Debug -sdk iphonesimulator -arch x86_64
+        
+    - name: Create ZIP for Appetize.io
+      run: |
+        cd ios/build/Build/Products/Debug-iphonesimulator
+        zip -r Runner.app.zip Runner.app
+        
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ios-simulator-build
+        path: ios/build/Build/Products/Debug-iphonesimulator/Runner.app.zip

@@ -1,8 +1,8 @@
 name: Flutter Build
 
 on:
-  push:
-    branches: [ main ]  # Only build on main branch
+  #push:
+  #  branches: [ main ]  # Only build on main branch
   pull_request:
     branches: [ main ]
   workflow_dispatch: # Allows manual triggering

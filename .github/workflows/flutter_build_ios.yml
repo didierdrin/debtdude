@@ -1,6 +1,6 @@
 name: Build iOS for Appetize.io
 on:
-  workflow_dispatch:  # Allows manual trigger
+  workflow_dispatch:
   push:
     branches: [ main ]
 
@@ -11,6 +11,20 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Navigate to Flutter Project
+      run: |
+        echo "📁 Current directory: $(pwd)"
+        echo "📁 Listing:"
+        ls -la
+        
+        # Navigate into your Flutter project
+        # Change 'debtdude' to your actual project folder name
+        cd debtdude
+        
+        echo "📁 Now in: $(pwd)"
+        echo "📁 Project files:"
+        ls -la
+        
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
@@ -19,21 +33,19 @@ jobs:
     - name: Install CocoaPods
       run: |
         cd ios
-        pod install
+        pod install --repo-update
         
     - name: Build for iOS Simulator
       run: |
-        flutter build ios --debug --simulator
-        cd ios
-        xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Debug -sdk iphonesimulator -arch x86_64
+        flutter build ios --debug --simulator --no-codesign
         
     - name: Create ZIP for Appetize.io
       run: |
-        cd ios/build/Build/Products/Debug-iphonesimulator
+        cd build/ios/iphonesimulator
         zip -r Runner.app.zip Runner.app
         
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
       with:
         name: ios-simulator-build
-        path: ios/build/Build/Products/Debug-iphonesimulator/Runner.app.zip
+        path: debtdude/build/ios/iphonesimulator/Runner.app.zip

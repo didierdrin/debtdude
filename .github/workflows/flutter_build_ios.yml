@@ -1,5 +1,6 @@
 name: Build iOS for Appetize.io
-on: workflow_dispatch
+on:
+  workflow_dispatch:
 
 jobs:
   build-ios:
@@ -7,22 +8,58 @@ jobs:
     
     steps:
     - uses: actions/checkout@v4
-    - uses: subosito/flutter-action@v2
-      
-    - name: Install CocoaPods
-      run: cd ios && pod install
-      
-    - name: Build iOS Simulator
-      run: flutter build ios --simulator --debug
-      
-    - name: Create Appetize Package
-      run: |
-        cd build/ios/iphonesimulator
-        zip -r Runner.app.zip Runner.app
-        echo "✅ Created Runner.app.zip"
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.16.0'  # Specify a version
         
-    - name: Upload
+    - name: Generate iOS Files
+      run: |
+        echo "🔍 Checking iOS configuration..."
+        
+        # Check if Podfile exists
+        if [ ! -f "ios/Podfile" ]; then
+          echo "📱 No Podfile found. Generating iOS files..."
+          
+          # Create iOS platform files
+          flutter create --platforms=ios --project-name debtdude --org com.debtdude .
+          
+          echo "✅ iOS files generated"
+        else
+          echo "✅ Podfile already exists"
+        fi
+        
+        # Verify
+        echo "📁 iOS directory contents:"
+        ls -la ios/
+        
+    - name: Install CocoaPods Dependencies
+      run: |
+        cd ios
+        pod install --repo-update
+        
+    - name: Build for iOS Simulator
+      run: |
+        flutter build ios --simulator --debug --no-codesign
+        
+    - name: Create Appetize.io Package
+      run: |
+        if [ -d "build/ios/iphonesimulator/Runner.app" ]; then
+          cd build/ios/iphonesimulator
+          zip -r Runner.app.zip Runner.app
+          echo "✅ Created Runner.app.zip"
+          echo "📊 Size: $(du -h Runner.app.zip | cut -f1)"
+        else
+          echo "❌ Runner.app not found!"
+          echo "Searching for .app files:"
+          find . -name "*.app" -type d 2>/dev/null
+          exit 1
+        fi
+        
+    - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: debtdude-ios-appetize
         path: build/ios/iphonesimulator/Runner.app.zip
+        retention-days: 7

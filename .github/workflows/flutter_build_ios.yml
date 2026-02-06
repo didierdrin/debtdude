@@ -9,10 +9,18 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Setup Flutter
+    - name: Setup Flutter 3.38.6
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.16.0'  # Specify a version
+        flutter-version: '3.38.6'  # Updated to match your error suggestion
+        
+    - name: Disable Analytics (to skip the welcome message)
+      run: flutter config --no-analytics
+      
+    - name: Get Dependencies First
+      run: |
+        echo "📦 Getting Flutter dependencies..."
+        flutter pub get
         
     - name: Generate iOS Files
       run: |
@@ -22,8 +30,8 @@ jobs:
         if [ ! -f "ios/Podfile" ]; then
           echo "📱 No Podfile found. Generating iOS files..."
           
-          # Create iOS platform files
-          flutter create --platforms=ios --project-name debtdude --org com.debtdude .
+          # Create iOS platform files WITHOUT recreating entire project
+          flutter create --platforms=ios --no-overwrite .
           
           echo "✅ iOS files generated"
         else
